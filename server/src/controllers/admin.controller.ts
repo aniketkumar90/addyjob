@@ -558,13 +558,43 @@ export const createJob = async (req: Request, res: Response) => {
 
     let initialStatus = ['Active', 'Pending', 'Expired', 'Closed', 'Paused'].includes(status) ? status : 'Active';
     const reqUser = (req as any).user;
-    if (reqUser?.role === 'company' || (!reqUser && companyId)) {
-      const targetCompanyId = companyId || reqUser?.id;
-      if (targetCompanyId) {
-        const compUser = await User.findById(targetCompanyId);
-        if (compUser && (compUser.status !== 'Approved' || compUser.permissions?.jobs !== true)) {
-          initialStatus = 'Pending';
+    const isCompanyRole = reqUser?.role === 'company' || (!reqUser && companyId);
+
+    if (isCompanyRole) {
+      let compUser: any = null;
+      const candidateLookupIds = [
+        companyId,
+        reqUser?.id,
+        reqUser?._id,
+        reqUser?.userId,
+        reqUser?.email,
+        company,
+      ].filter(Boolean);
+
+      for (const lookupId of candidateLookupIds) {
+        if (compUser) break;
+        try {
+          if (mongoose.isValidObjectId(lookupId)) {
+            compUser = await User.findById(lookupId);
+          }
+        } catch (e) {}
+        if (!compUser) {
+          try {
+            compUser = await User.findOne({
+              $or: [
+                { userId: lookupId },
+                { customId: lookupId },
+                { email: lookupId },
+                { companyName: lookupId },
+              ],
+            });
+          } catch (e) {}
         }
+      }
+
+      // If company does not exist, or is not Approved, or lacks job posting permission, strictly force Pending
+      if (!compUser || compUser.status !== 'Approved' || compUser.permissions?.jobs !== true) {
+        initialStatus = 'Pending';
       }
     }
 
@@ -696,6 +726,15 @@ export const updateJobStatus = async (req: Request, res: Response) => {
     if (!['Active', 'Pending', 'Expired', 'Closed', 'Paused'].includes(status)) {
       res.status(400).json({ success: false, message: 'Invalid job status' });
       return;
+    }
+
+    const reqUser = (req as any).user;
+    if (reqUser?.role === 'company' && status === 'Active') {
+      const compUser = mongoose.isValidObjectId(reqUser.id) ? await User.findById(reqUser.id) : null;
+      if (compUser && (compUser.status !== 'Approved' || compUser.permissions?.jobs !== true)) {
+        res.status(403).json({ success: false, message: 'Company is pending approval. You cannot activate jobs until approved by Super Admin.' });
+        return;
+      }
     }
 
     let job = null;

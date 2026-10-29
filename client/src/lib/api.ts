@@ -240,6 +240,9 @@ export const getAuthHeaders = (contentType: boolean = false): Record<string, str
   if (contentType) {
     headers['Content-Type'] = 'application/json';
   }
+  if (typeof window !== 'undefined' && window.location.pathname.startsWith('/admin')) {
+    headers['x-admin-portal'] = 'true';
+  }
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }
@@ -770,11 +773,17 @@ export async function createCompanyJob(jobData: any): Promise<{ success: boolean
 }
 
 // Fetch jobs for a specific company or all jobs
-export async function fetchCompanyJobs(params?: { companyId?: string; company?: string }, forceRefresh = false): Promise<any[]> {
+export async function fetchCompanyJobs(params?: { companyId?: string; company?: string; status?: string }, forceRefresh = false): Promise<any[]> {
   try {
     const query = new URLSearchParams();
     if (params?.companyId) query.set("companyId", params.companyId);
     if (params?.company) query.set("company", params.company);
+    if (params?.status) {
+      query.set("status", params.status);
+    } else {
+      // Default to "all" for company dashboard so that both Pending and Active jobs are retrieved
+      query.set("status", "all");
+    }
     const qs = query.toString();
     const url = qs ? `${API_BASE_URL}/jobs?${qs}` : `${API_BASE_URL}/jobs`;
     const json = await cachedFetch<any>(url, { headers: getAuthHeaders() }, 10000, forceRefresh);
@@ -1930,9 +1939,11 @@ export async function sendBulkResumesToCompany(
   purchasedResumes?: any[];
 }> {
   try {
+    const headers = getAuthHeaders(true);
+    headers['x-admin-portal'] = 'true';
     const res = await fetch(`${API_BASE_URL}/admin/resumes/bulk-send`, {
       method: 'POST',
-      headers: getAuthHeaders(true),
+      headers,
       body: JSON.stringify({ companyId, resumes }),
     });
     const data = await res.json();

@@ -96,6 +96,7 @@ import {
   notifyApplicationSync,
   testCompanyNotificationAPI,
 } from "@/lib/api";
+import { downloadCandidateResume } from "@/lib/resumeDownload";
 import CompanyJobApplicantsModal, {
   CompanyCandidateApplicant,
 } from "@/components/company/CompanyJobApplicantsModal";
@@ -1713,18 +1714,7 @@ export default function CompanyDashboardPage() {
       showToast("🔒 Candidate Resumes access is locked under your company trial permissions.");
       return;
     }
-    const downloadSource = res.downloadUrl || res.pdfData;
-    if (downloadSource && typeof window !== "undefined") {
-      const link = document.createElement("a");
-      link.href = downloadSource;
-      link.download = `${res.candidateName.replace(/\s+/g, "_")}_Resume.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      showToast(`Downloading verified resume for ${res.candidateName}...`);
-    } else {
-      showToast(`Downloading verified resume for ${res.candidateName}...`);
-    }
+    downloadCandidateResume(res, (msg) => showToast(msg));
   };
 
   // Action: Unlock a candidate resume using 1 credit
@@ -2082,8 +2072,9 @@ export default function CompanyDashboardPage() {
         console.error("Backend update job error:", err);
       });
     } else {
-      // Create new job: If company is Approved AND has direct job permission -> Active (Live), otherwise -> Pending
-      const targetStatus: "Active" | "Pending" = canPostLiveJobs ? "Active" : "Pending";
+      // Create new job: If company itself is in approval / not approved (status !== 'Approved') or lacks live job permission -> strictly 'Pending'
+      const isApprovedCompany = companyStatus === "Approved" && isCompanyApproved;
+      const targetStatus: "Active" | "Pending" = isApprovedCompany && canPostLiveJobs ? "Active" : "Pending";
 
       const jobPayload = {
         title: jobTitle,
@@ -2123,10 +2114,10 @@ export default function CompanyDashboardPage() {
         return updated;
       });
 
-      if (canPostLiveJobs) {
+      if (targetStatus === "Active") {
         showToast(`🎉 Job opening "${jobTitle}" has been posted directly as LIVE!`);
       } else {
-        showToast(`📋 Job posting "${jobTitle}" submitted! Since company is not approved / live permission is pending, it has been placed in Pending status awaiting Super Admin approval.`);
+        showToast(`📋 Job posting "${jobTitle}" submitted! Since company is awaiting approval, it has been placed in Pending status for Super Admin approval.`);
       }
 
       // Persist to MongoDB backend and sync real id
@@ -3846,11 +3837,11 @@ export default function CompanyDashboardPage() {
 
               {/* JOBS TABLE: Clean layout with 3-dots action menu and zero horizontal scrolling */}
               <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-xs">
-                <div className="overflow-x-auto w-full">
+                <div className="w-full">
                   <table className="w-full text-left text-xs">
                     <thead className="bg-slate-50 text-slate-500 font-bold uppercase text-[10px] tracking-wider border-b border-slate-200/80">
                       <tr>
-                        <th className="py-3.5 px-3 sm:px-4 whitespace-nowrap">Job Role</th>
+                        <th className="py-3.5 px-3 sm:px-4 whitespace-nowrap w-[180px] max-w-[180px]">Job Role</th>
                         <th className="py-3.5 px-3 sm:px-4 whitespace-nowrap">Department & Mode</th>
                         <th className="py-3.5 px-3 sm:px-4 whitespace-nowrap">Location</th>
                         <th className="py-3.5 px-3 sm:px-4 whitespace-nowrap">Salary & Exp</th>
@@ -3873,8 +3864,8 @@ export default function CompanyDashboardPage() {
                       ) : (
                         jobs.map((job) => (
                         <tr key={job.id} className="hover:bg-slate-50/60 transition">
-                          <td className="py-3.5 px-3 sm:px-4 font-bold text-slate-900 whitespace-nowrap">
-                            <span>{job.title}</span>
+                          <td className="py-3.5 px-3 sm:px-4 font-bold text-slate-900 w-[180px] max-w-[180px]">
+                            <div className="w-[170px] max-w-[170px] overflow-x-auto whitespace-nowrap scrollbar-thin-horizontal pb-0.5 select-text" title={job.title}><span>{job.title}</span></div>
                           </td>
                           <td className="py-3.5 px-3 sm:px-4 whitespace-nowrap">
                             <div className="font-semibold text-slate-700">{job.department}</div>
@@ -3912,7 +3903,7 @@ export default function CompanyDashboardPage() {
                                   : "bg-slate-100 text-slate-600 border border-slate-200"
                               }`}
                             >
-                              {job.status === "Pending" ? "Pending Approval" : job.status}
+                              {job.status}
                             </span>
                           </td>
                           <td className="py-3.5 px-3 sm:px-4 text-right whitespace-nowrap">
@@ -3955,6 +3946,10 @@ export default function CompanyDashboardPage() {
                                       onClick={async () => {
                                         setActionMenuJobId(null);
                                         const newStatus = (job.status === "Active" ? "Paused" : "Active") as "Active" | "Pending" | "Paused" | "Closed";
+                                        if (newStatus === "Active" && (!canPostLiveJobs || companyStatus !== "Approved")) {
+                                          showToast("Company is awaiting approval. You cannot activate jobs until approved by Super Admin.");
+                                          return;
+                                        }
                                         setJobs((prev) => {
                                           const updated = prev.map((j) =>
                                             j.id === job.id ? { ...j, status: newStatus } : j
@@ -5752,11 +5747,7 @@ export default function CompanyDashboardPage() {
                     if (selectedApplicant.id) {
                       markResumeViewedAPI(selectedApplicant.id).catch(() => {});
                     }
-                    if (selectedApplicant.resumeUrl) {
-                      window.open(selectedApplicant.resumeUrl, "_blank");
-                    } else {
-                      showToast(`Viewing resume for ${selectedApplicant.candidateName}`);
-                    }
+                    downloadCandidateResume(selectedApplicant, (msg) => showToast(msg));
                   }}
                   className="px-3 py-1.5 rounded-xl bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-bold flex items-center gap-1.5 cursor-pointer shadow-xs"
                 >

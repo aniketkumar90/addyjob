@@ -19,7 +19,7 @@ export const getJobs = async (req: Request, res: Response) => {
       department,
       company,
       companyId,
-      status = 'Active',
+      status,
       limit,
     } = req.query;
 
@@ -27,17 +27,24 @@ export const getJobs = async (req: Request, res: Response) => {
 
     // For job seekers and public searches (when companyId is not specified), strictly only return Active approved jobs
     if (!companyId) {
-      filter.status = 'Active';
+      filter.status = status && status !== 'all' ? status : 'Active';
     } else if (status && status !== 'all') {
       filter.status = status;
     }
 
-    // Company filter
+    // Company filter: support ObjectId, string ID, and company name fallback
     if (companyId) {
-      filter.$or = [
+      const orConditions: any[] = [
         { companyId: companyId },
         { companyId: String(companyId) },
       ];
+      if (mongoose.isValidObjectId(companyId)) {
+        orConditions.push({ companyId: new mongoose.Types.ObjectId(String(companyId)) });
+      }
+      if (company) {
+        orConditions.push({ company: new RegExp(`^${String(company).trim()}$`, 'i') });
+      }
+      filter.$or = orConditions;
     } else if (company) {
       filter.company = new RegExp(`^${String(company).trim()}$`, 'i');
     }
@@ -320,29 +327,72 @@ export const createJob = async (req: Request, res: Response) => {
     }
 
     let finalCompany = (company || '').trim();
-    let finalCompanyId = companyId || (reqUser?.role === 'company' ? reqUser.id : undefined);
+    let finalCompanyId = companyId || (reqUser?.role === 'company' ? (reqUser.id || reqUser._id || reqUser.userId) : undefined);
 
-    let hasJobPermission = !isCompanyRole; // admin or sadmin has permission by default
+    // Thorough lookup of company user across MongoDB _id, userId, customId, email, and companyName
+    let compUser: any = null;
+    const candidateLookupIds = [
+      finalCompanyId,
+      reqUser?.id,
+      reqUser?._id,
+      reqUser?.userId,
+      reqUser?.email,
+      finalCompany,
+    ].filter(Boolean);
 
-    // If company user, check permissions.jobs
-    if (finalCompanyId) {
-      const compUser = await User.findById(finalCompanyId);
-      if (compUser) {
-        if (!finalCompany) {
-          finalCompany = compUser.companyName || compUser.name || compUser.email.split('@')[0];
+    for (const lookupId of candidateLookupIds) {
+      if (compUser) break;
+      try {
+        if (mongoose.isValidObjectId(lookupId)) {
+          compUser = await User.findById(lookupId);
         }
-        if (isCompanyRole) {
-          // Company must be Approved by Super Admin AND have permissions.jobs enabled to post live jobs
-          const isApproved = compUser.status === 'Approved';
-          hasJobPermission = isApproved && compUser.permissions?.jobs === true;
-        }
+      } catch (e) {}
+      if (!compUser) {
+        try {
+          compUser = await User.findOne({
+            $or: [
+              { userId: lookupId },
+              { customId: lookupId },
+              { email: lookupId },
+              { companyName: lookupId },
+            ],
+          });
+        } catch (e) {}
+      }
+    }
+
+    if (compUser) {
+      if (!finalCompany) {
+        finalCompany = compUser.companyName || compUser.name || compUser.email.split('@')[0];
+      }
+      if (!finalCompanyId) {
+        finalCompanyId = compUser._id?.toString() || compUser.userId;
       }
     }
     if (!finalCompany) {
       finalCompany = 'Hiring Company';
     }
 
-    const initialStatus = hasJobPermission ? (status || 'Active') : 'Pending';
+    // Determine initial status:
+    // If company is in approval / pending (status !== 'Approved'), ANY new job MUST be 'Pending'
+    let initialStatus = 'Pending';
+    const isAdminUser = reqUser?.role === 'admin' || reqUser?.role === 'sadmin';
+
+    if (isAdminUser) {
+      initialStatus = status || 'Active';
+    } else {
+      // For any company user or company posting:
+      // Company MUST be Approved by Super Admin AND have permissions.jobs enabled to post live jobs.
+      // If company is under approval (status === 'Pending' or !== 'Approved'), the new job is strictly 'Pending'.
+      const isApproved = compUser ? compUser.status === 'Approved' : false;
+      const hasJobPermission = isApproved && compUser?.permissions?.jobs === true;
+
+      if (isApproved && hasJobPermission) {
+        initialStatus = status === 'Paused' ? 'Paused' : 'Active';
+      } else {
+        initialStatus = 'Pending';
+      }
+    }
 
     const newJob = await Job.create({
       title: title.trim(),
@@ -369,7 +419,7 @@ export const createJob = async (req: Request, res: Response) => {
 
     const responseMsg =
       initialStatus === 'Pending'
-        ? `Job posting "${newJob.title}" submitted successfully! It is pending Super Admin approval.`
+        ? `Job posting "${newJob.title}" submitted successfully! Since your company is currently under review / pending approval, this job has been placed in Pending status for Super Admin approval.`
         : `Job posting "${newJob.title}" is now LIVE!`;
 
     res.status(201).json({

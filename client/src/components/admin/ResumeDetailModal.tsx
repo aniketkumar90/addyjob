@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { downloadCandidateResume } from "@/lib/resumeDownload";
 import {
   X,
   FileText,
@@ -374,19 +375,15 @@ export default function ResumeDetailModal({
               </button>
 
               {/* Direct PDF Download if attached */}
-              {hasPdf && (
-                <a
-                  href={pdfSource}
-                  download={
-                    application.fileName || `${candidateName.replace(/\s+/g, "_")}_Resume.pdf`
-                  }
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition shadow-sm"
-                  title="Download Attached PDF"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">PDF</span>
-                </a>
-              )}
+              <button
+                type="button"
+                onClick={() => downloadCandidateResume(application)}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition shadow-sm cursor-pointer"
+                title="Download Candidate Resume PDF"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Download PDF</span>
+              </button>
 
               {/* Copy Summary */}
               <button

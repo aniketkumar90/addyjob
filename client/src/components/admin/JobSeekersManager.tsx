@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import { JobSeekerRecord } from "@/lib/api";
 import BulkSendResumesModal from "./BulkSendResumesModal";
+import { downloadCandidateResume } from "@/lib/resumeDownload";
 import { CompanyRecord } from "./CompaniesManager";
 
 interface DropdownOption {
@@ -809,17 +810,17 @@ export default function JobSeekersManager({
                               <FileText className="w-3.5 h-3.5 text-emerald-600" />
                               <span>Resume</span>
                             </button>
-                            {c.resumeUrl && (
-                              <a
-                                href={c.resumeUrl}
-                                download={c.resumeName || "Resume.pdf"}
-                                onClick={(e) => e.stopPropagation()}
-                                className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition"
-                                title="Download Resume"
-                              >
-                                <Download className="w-3.5 h-3.5" />
-                              </a>
-                            )}
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                downloadCandidateResume(c);
+                              }}
+                              className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition cursor-pointer"
+                              title="Download Resume"
+                            >
+                              <Download className="w-3.5 h-3.5" />
+                            </button>
                           </div>
                         ) : (
                           <span className="inline-flex items-center gap-1 text-slate-400 text-xs font-medium">
@@ -1056,16 +1057,15 @@ export default function JobSeekersManager({
                       Uploaded Resume
                     </h4>
                   </div>
-                  {selectedCandidate.resumeUrl && (
-                    <a
-                      href={selectedCandidate.resumeUrl}
-                      download={selectedCandidate.resumeName || "Resume.pdf"}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs transition shadow-xs"
-                    >
-                      <Download className="w-3.5 h-3.5" />
-                      <span>Download Resume</span>
-                    </a>
-                  )}
+                  <button
+                    type="button"
+                    onClick={() => downloadCandidateResume(selectedCandidate)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs transition shadow-xs cursor-pointer"
+                    title="Download Verified Resume PDF"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Download Resume</span>
+                  </button>
                 </div>
 
                 {selectedCandidate.resumeName || selectedCandidate.resumeUrl ? (

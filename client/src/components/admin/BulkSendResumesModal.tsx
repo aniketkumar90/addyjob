@@ -303,7 +303,7 @@ export default function BulkSendResumesModal({
       setIsSubmitting(true);
       setErrorMessage("");
 
-      const companyTargetId = selectedCompany.id || selectedCompany.userId || "";
+      const companyTargetId = selectedCompany.id || (selectedCompany as any)._id || selectedCompany.userId || (selectedCompany as any).customId || "";
       if (!companyTargetId) {
         setErrorMessage("Please select a valid company.");
         setIsSubmitting(false);

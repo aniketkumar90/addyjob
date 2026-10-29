@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Briefcase,
   Search,
@@ -15,6 +15,10 @@ import {
   Users,
   ExternalLink,
   Mail,
+  MoreVertical,
+  XCircle,
+  Pause,
+  Play,
 } from "lucide-react";
 import JobDetailModal from "./JobDetailModal";
 import JobApplicantsModal from "./JobApplicantsModal";
@@ -76,6 +80,13 @@ export default function JobsModerator({
   const [isApplicantsModalOpen, setIsApplicantsModalOpen] = useState(false);
   const [jobApplicants, setJobApplicants] = useState<ApplicationItem[]>([]);
   const [isLoadingApplicants, setIsLoadingApplicants] = useState(false);
+  const [actionMenuJobId, setActionMenuJobId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleClickOutside = () => setActionMenuJobId(null);
+    window.addEventListener("click", handleClickOutside);
+    return () => window.removeEventListener("click", handleClickOutside);
+  }, []);
 
   const handleViewJob = (job: JobPosting) => {
     setSelectedJob(job);
@@ -194,8 +205,8 @@ export default function JobsModerator({
       </div>
 
       {/* Jobs Grid / Table */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.03)] overflow-hidden">
-        <div className="overflow-x-auto">
+      <div className="bg-white rounded-2xl border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.03)]">
+        <div className="overflow-x-auto min-h-[320px]">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50/70 border-b border-slate-200 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
@@ -215,7 +226,7 @@ export default function JobsModerator({
                   </td>
                 </tr>
               ) : (
-                filteredJobs.map((j) => {
+                filteredJobs.map((j, idx) => {
                   const matchedComp = companies?.find(
                     (c) =>
                       (j.companyId && (c.id === j.companyId || c.userId === j.companyId)) ||
@@ -307,64 +318,125 @@ export default function JobsModerator({
                     </td>
 
                     <td className="py-3.5 px-4 text-right whitespace-nowrap">
-                      <div className="flex items-center justify-end gap-1.5 whitespace-nowrap">
-                        {/* Eye Button to inspect job details */}
+                      <div className="relative inline-block text-left" onClick={(e) => e.stopPropagation()}>
                         <button
-                          onClick={() => handleViewJob(j)}
-                          aria-label="View job posting"
-                          className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 border border-slate-200/90 hover:border-blue-300 rounded-lg transition-all cursor-pointer shadow-2xs"
-                          title="View Job Details"
+                          type="button"
+                          onClick={() => setActionMenuJobId(actionMenuJobId === j.id ? null : j.id)}
+                          className={`w-8 h-8 rounded-xl flex items-center justify-center transition cursor-pointer border ${
+                            actionMenuJobId === j.id
+                              ? "bg-slate-200 text-slate-900 border-slate-300 shadow-inner"
+                              : "text-slate-500 hover:text-slate-800 hover:bg-slate-100 border-transparent hover:border-slate-200"
+                          }`}
+                          title="Actions"
                         >
-                          <Eye className="w-3.5 h-3.5" />
+                          <MoreVertical className="w-4 h-4" />
                         </button>
 
-                        {j.status === "Pending" ? (
-                          <>
+                        {actionMenuJobId === j.id && (
+                          <div
+                            className={`absolute right-0 ${
+                              idx >= filteredJobs.length - 2 && filteredJobs.length >= 3
+                                ? "bottom-full mb-1.5"
+                                : "top-full mt-1.5"
+                            } w-52 bg-white rounded-2xl shadow-xl border border-slate-200/90 py-1.5 z-50 text-left animate-in fade-in zoom-in-95`}
+                          >
+                            {/* View Job Details */}
                             <button
                               type="button"
-                              onClick={() => onToggleStatus(j.id, "Active")}
-                              className="px-3 py-1.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 active:scale-95 rounded-lg shadow-sm transition-all flex items-center gap-1 cursor-pointer"
-                              title="Approve job and make it live for job seekers"
+                              onClick={() => {
+                                setActionMenuJobId(null);
+                                handleViewJob(j);
+                              }}
+                              className="w-full px-3.5 py-2 text-xs font-semibold text-slate-700 hover:text-blue-600 hover:bg-blue-50/70 flex items-center gap-2.5 transition cursor-pointer"
                             >
-                              <CheckCircle2 className="w-3.5 h-3.5" />
-                              <span>Approve</span>
+                              <Eye className="w-3.5 h-3.5 text-slate-400" />
+                              <span>View Details</span>
                             </button>
+
+                            {/* View Applicants */}
                             <button
                               type="button"
-                              onClick={() => onToggleStatus(j.id, "Closed")}
-                              className="px-2.5 py-1.5 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg transition-all cursor-pointer"
-                              title="Reject / Close job posting"
+                              onClick={() => {
+                                setActionMenuJobId(null);
+                                handleOpenApplicants(j);
+                              }}
+                              className="w-full px-3.5 py-2 text-xs font-semibold text-slate-700 hover:text-blue-600 hover:bg-blue-50/70 flex items-center gap-2.5 transition cursor-pointer"
                             >
-                              Reject
+                              <Users className="w-3.5 h-3.5 text-slate-400" />
+                              <span>View Applicants ({j.applicantsCount ?? 0})</span>
                             </button>
-                          </>
-                        ) : j.status === "Active" ? (
-                          <button
-                            type="button"
-                            onClick={() => onToggleStatus(j.id, "Closed")}
-                            className="px-2.5 py-1.5 text-xs font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-lg transition-all cursor-pointer"
-                            title="Close active job"
-                          >
-                            Close
-                          </button>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => onToggleStatus(j.id, "Active")}
-                            className="px-2.5 py-1.5 text-xs font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg transition-all cursor-pointer"
-                            title="Reactivate job"
-                          >
-                            Reactivate
-                          </button>
+
+                            <div className="h-px bg-slate-100 my-1" />
+
+                            {/* Status Moderation Actions */}
+                            {j.status === "Pending" ? (
+                              <>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setActionMenuJobId(null);
+                                    onToggleStatus(j.id, "Active");
+                                  }}
+                                  className="w-full px-3.5 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-50 flex items-center gap-2.5 transition cursor-pointer"
+                                >
+                                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                                  <span>Approve Job</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setActionMenuJobId(null);
+                                    onToggleStatus(j.id, "Closed");
+                                  }}
+                                  className="w-full px-3.5 py-2 text-xs font-semibold text-rose-700 hover:bg-rose-50 flex items-center gap-2.5 transition cursor-pointer"
+                                >
+                                  <XCircle className="w-3.5 h-3.5 text-rose-500" />
+                                  <span>Reject Job</span>
+                                </button>
+                              </>
+                            ) : j.status === "Active" ? (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setActionMenuJobId(null);
+                                  onToggleStatus(j.id, "Closed");
+                                }}
+                                className="w-full px-3.5 py-2 text-xs font-semibold text-amber-700 hover:bg-amber-50 flex items-center gap-2.5 transition cursor-pointer"
+                              >
+                                <Pause className="w-3.5 h-3.5 text-amber-600" />
+                                <span>Close / Pause Job</span>
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setActionMenuJobId(null);
+                                  onToggleStatus(j.id, "Active");
+                                }}
+                                className="w-full px-3.5 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-50 flex items-center gap-2.5 transition cursor-pointer"
+                              >
+                                <Play className="w-3.5 h-3.5 text-blue-600" />
+                                <span>Reactivate Job</span>
+                              </button>
+                            )}
+
+                            <div className="h-px bg-slate-100 my-1" />
+
+                            {/* Delete */}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setActionMenuJobId(null);
+                                if (!confirm(`Are you sure you want to delete job "${j.title}"?`)) return;
+                                onDeleteJob(j.id);
+                              }}
+                              className="w-full px-3.5 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 flex items-center gap-2.5 transition cursor-pointer"
+                            >
+                              <Trash2 className="w-3.5 h-3.5 text-rose-500" />
+                              <span>Delete Job</span>
+                            </button>
+                          </div>
                         )}
-                        <button
-                          onClick={() => onDeleteJob(j.id)}
-                          aria-label="Delete job posting"
-                          className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
-                          title="Delete Job"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
                       </div>
                     </td>
                   </tr>

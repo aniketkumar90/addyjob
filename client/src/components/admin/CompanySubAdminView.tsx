@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { downloadCandidateResume } from "@/lib/resumeDownload";
 import {
   Building2,
   Briefcase,
@@ -973,7 +974,7 @@ export default function CompanySubAdminView({
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => alert(`Downloading resume for ${selectedResume.name}...`)}
+                  onClick={() => downloadCandidateResume(selectedResume)}
                   className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs transition cursor-pointer flex items-center gap-1.5 shadow-sm"
                 >
                   <Download className="w-4 h-4" />

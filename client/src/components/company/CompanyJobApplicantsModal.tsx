@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import ResumeDetailModal from "../admin/ResumeDetailModal";
 import { markResumeViewedAPI, notifyApplicationSync } from "@/lib/api";
+import { downloadCandidateResume } from "@/lib/resumeDownload";
 
 export interface CompanyCandidateApplicant {
   id: string;
