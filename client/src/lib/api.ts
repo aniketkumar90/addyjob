@@ -1265,6 +1265,30 @@ export async function activateCompanyTrial(data?: { companyId?: string; email?: 
   }
 }
 
+export async function unlockCompanyResume(
+  resumeId: string,
+  candidateName?: string
+): Promise<{
+  success: boolean;
+  message: string;
+  resume?: any;
+  resumesUsed?: number;
+  remainingCredits?: number;
+  totalCredits?: number;
+}> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/companies/resumes/${encodeURIComponent(resumeId)}/unlock`, {
+      method: 'POST',
+      headers: getAuthHeaders(true),
+      body: JSON.stringify({ candidateName }),
+    });
+    return await res.json();
+  } catch (error: any) {
+    console.error('unlockCompanyResume error:', error);
+    return { success: false, message: error.message || 'Failed to unlock resume' };
+  }
+}
+
 export async function fetchAdminPermissionsSettings(forceRefresh = false): Promise<any> {
   try {
     const json = await cachedFetch<any>(

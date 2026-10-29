@@ -80,6 +80,7 @@ import {
   fetchAdminPermissionsSettings,
   fetchCurrentUser,
   updateUserProfile,
+  unlockCompanyResume,
   fetchAdminPlans,
   fetchPublicJobs,
   createCompanyJob,
@@ -1561,6 +1562,8 @@ export default function CompanyDashboardPage() {
 
           // Count resumes unlocked in vault
           const countUnlockedInVault = currentVault.filter((r) => r.isUnlocked).length;
+          usedCredits = countUnlockedInVault;
+          safeSetLocalStorage(`company_resumes_used_${uid}`, String(usedCredits));
           if (countUnlockedInVault > usedCredits) {
             usedCredits = countUnlockedInVault;
           }
@@ -1606,7 +1609,10 @@ export default function CompanyDashboardPage() {
           if (saved) {
             try {
               const parsed = JSON.parse(saved);
-              if (Array.isArray(parsed)) setPurchasedResumes(parsed);
+              if (Array.isArray(parsed)) {
+                setPurchasedResumes(parsed);
+                setResumesUsed(parsed.filter((r: any) => r.isUnlocked).length);
+              }
             } catch (e) {}
           }
           const savedTotalCredits = localStorage.getItem(`company_total_credits_${uid}`);
@@ -1723,7 +1729,9 @@ export default function CompanyDashboardPage() {
       showToast("🔒 Candidate Resumes access is locked under your company trial permissions.");
       return;
     }
-    const availableCredits = totalResumesPurchased - resumesUsed;
+    const currentlyUnlocked = purchasedResumes.filter((r) => r.isUnlocked).length;
+    const effectiveUsed = Math.max(resumesUsed, currentlyUnlocked);
+    const availableCredits = totalResumesPurchased - effectiveUsed;
     if (availableCredits <= 0) {
       showToast("⚠️ Insufficient credits! Please purchase more credits to unlock this candidate.");
       setIsBuyCreditsModalOpen(true);
@@ -1733,9 +1741,17 @@ export default function CompanyDashboardPage() {
     const u = getStoredUser();
     const uid = (u as any)?._id || u?.id || (u as any)?.userId || u?.email;
 
+
+
     // 1. Mark this candidate resume as unlocked
     const updatedVault = purchasedResumes.map((r) => {
-      if (r.id === resume.id) {
+      const targetId = String(resume.id || (resume as any)._id || "").trim();
+      const targetName = String(resume.candidateName || (resume as any).name || "").trim().toLowerCase();
+      const rId = String(r.id || (r as any)._id || "").trim();
+      const rName = String(r.candidateName || (r as any).name || "").trim().toLowerCase();
+      const isMatch = (targetId && (rId === targetId || String((r as any)._id) === targetId)) ||
+                      (targetName && rName === targetName);
+      if (isMatch) {
         return {
           ...r,
           isUnlocked: true,
@@ -1750,7 +1766,7 @@ export default function CompanyDashboardPage() {
     });
 
     // 2. Decrement 1 credit (increment resumesUsed by 1)
-    const newUsed = resumesUsed + 1;
+    const newUsed = currentlyUnlocked + 1;
     setResumesUsed(newUsed);
     setPurchasedResumes(updatedVault);
 
@@ -1769,6 +1785,11 @@ export default function CompanyDashboardPage() {
 
     // 4. Persist to MongoDB backend
     try {
+      const resumeIdToUnlock = String(resume.id || (resume as any)._id || "");
+      const unlockRes = await unlockCompanyResume(resumeIdToUnlock, resume.candidateName);
+      if (unlockRes && unlockRes.success) {
+        if (typeof unlockRes.resumesUsed === "number") setResumesUsed(unlockRes.resumesUsed);
+      }
       await updateUserProfile({
         purchasedResumes: updatedVault,
         resumesUsed: newUsed,
@@ -1778,7 +1799,8 @@ export default function CompanyDashboardPage() {
       console.warn("Backend unlock sync error:", err);
     }
 
-    showToast(`🎉 ${resume.candidateName}'s contact details unlocked! 1 Credit used. (${availableCredits - 1} credits left)`);
+    const remainingLeft = Math.max(0, totalResumesPurchased - newUsed);
+    showToast(`🎉 ${resume.candidateName || "Candidate"}'s contact details unlocked! 1 Credit used. (${remainingLeft} credits left)`);
   };
 
   // Helper to compress uploaded image before storing/sending
@@ -2158,6 +2180,8 @@ export default function CompanyDashboardPage() {
     if (typeof window !== "undefined") {
       const u = getStoredUser();
       const uid = (u as any)?._id || u?.id || (u as any)?.userId || u?.email;
+
+
       if (uid) {
         localStorage.setItem(`company_total_credits_${uid}`, String(nextTotal));
       }

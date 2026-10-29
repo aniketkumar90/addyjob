@@ -33,6 +33,8 @@ const router = Router();
 
 // Public read for system permissions & Free Trial configuration (used by company dashboard & pricing)
 router.get('/permissions-settings', getAdminPermissionsSettings);
+router.get('/plans', getAdminPlans);
+
 
 // 🔒 All remaining admin routes require valid JWT + admin/sadmin role
 router.use(authenticate);
@@ -73,7 +75,7 @@ router.post('/resumes/bulk-send', sendBulkResumesToCompany);
 router.post('/companies/:id/send-resumes', sendBulkResumesToCompany);
 
 // Plans & Pricing
-router.get('/plans', getAdminPlans);
+
 router.post('/plans', createAdminPlan);
 router.put('/plans/:id', updateAdminPlan);
 router.patch('/plans/:id', updateAdminPlan);

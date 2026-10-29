@@ -701,6 +701,14 @@ export const updateProfile = async (req: Request, res: Response): Promise<void> 
       if (req.body.resumesUsed !== undefined) user.resumesUsed = req.body.resumesUsed;
       if (req.body.plan !== undefined) user.plan = req.body.plan;
       if (req.body.permissions !== undefined) user.permissions = req.body.permissions;
+    } else if (user.role === 'company') {
+      if (req.body.purchasedResumes !== undefined && Array.isArray(req.body.purchasedResumes)) {
+        user.purchasedResumes = req.body.purchasedResumes;
+        user.markModified('purchasedResumes');
+      }
+      if (req.body.resumesUsed !== undefined && typeof req.body.resumesUsed === 'number') {
+        user.resumesUsed = req.body.resumesUsed;
+      }
     }
     if (req.body.notificationSettings !== undefined) {
       user.notificationSettings = {

@@ -5,6 +5,7 @@ import {
   updateCompanyById,
   testCompanyNotification,
   activateCompanyTrial,
+  unlockPurchasedResume,
 } from '../controllers/company.controller.js';
 import { authenticate } from '../middleware/auth.middleware.js';
 
@@ -23,6 +24,7 @@ router.get('/', getCompanies);
 router.get('/:id', getCompanyById);
 router.put('/:id', authenticate, updateCompanyById);
 router.post('/:id/test-notification', authenticate, testCompanyNotification);
+router.post('/resumes/:resumeId/unlock', authenticate, unlockPurchasedResume);
 
 export default router;
 

@@ -741,3 +741,118 @@ export const activateCompanyTrial = async (req: Request, res: Response) => {
     res.status(500).json({ success: false, message: error.message || 'Failed to activate Free Trial' });
   }
 };
+
+// @desc    Unlock candidate contact details from company's purchased resumes vault
+// @route   POST /api/companies/resumes/:resumeId/unlock
+// @access  Private / Company
+export const unlockPurchasedResume = async (req: Request, res: Response): Promise<void> => {
+  try {
+    await ensureDBConnection();
+    const authReq = req as any;
+    const userId = authReq.user?.id || authReq.user?.userId;
+    const userEmail = authReq.user?.email;
+
+    if (!userId && !userEmail) {
+      res.status(401).json({ success: false, message: 'Authentication required' });
+      return;
+    }
+
+    let company = null;
+    if (userId && mongoose.isValidObjectId(userId)) {
+      company = await User.findById(userId);
+    }
+    if (!company && userId) {
+      company = await User.findOne({
+        role: 'company',
+        $or: [{ userId }, { customId: userId }],
+      });
+    }
+    if (!company && userEmail) {
+      company = await User.findOne({
+        role: 'company',
+        $or: [{ email: userEmail.toLowerCase() }, { workEmail: userEmail.toLowerCase() }],
+      });
+    }
+
+    if (!company) {
+      res.status(404).json({ success: false, message: 'Company account not found' });
+      return;
+    }
+
+    const { resumeId } = req.params;
+    const { candidateName } = req.body || {};
+
+    const targetId = String(resumeId || '').trim();
+    const targetName = String(candidateName || '').trim().toLowerCase();
+
+    const vault = company.purchasedResumes || [];
+    const matchedResume: any = vault.find((r: any) => {
+      const rId = String(r.id || r._id || '').trim();
+      if (targetId && (rId === targetId || String(r._id) === targetId)) return true;
+      if (targetName && String(r.candidateName || r.name || '').trim().toLowerCase() === targetName) return true;
+      return false;
+    });
+
+    if (!matchedResume) {
+      res.status(404).json({ success: false, message: 'Resume not found in your company vault' });
+      return;
+    }
+
+    const currentlyUnlocked = vault.filter((r: any) => r.isUnlocked).length;
+    const totalCredits = company.resumeCredits ?? 0;
+
+    // If already unlocked, return success immediately
+    if (matchedResume.isUnlocked) {
+      const remainingCredits = Math.max(0, totalCredits - Math.max(currentlyUnlocked, company.resumesUsed ?? 0));
+      res.json({
+        success: true,
+        message: `${matchedResume.candidateName || 'Candidate'} contact details are already unlocked`,
+        resume: matchedResume,
+        resumesUsed: company.resumesUsed ?? currentlyUnlocked,
+        remainingCredits,
+        totalCredits,
+      });
+      return;
+    }
+
+    // Reconcile resumesUsed so it doesn't erroneously block valid credits
+    const currentUsed = Math.max(currentlyUnlocked, company.resumesUsed ?? 0);
+    const availableCredits = totalCredits - currentUsed;
+
+    if (availableCredits <= 0) {
+      res.status(400).json({
+        success: false,
+        message: 'Insufficient credits! Please purchase more credits to unlock this candidate.',
+        remainingCredits: 0,
+        totalCredits,
+      });
+      return;
+    }
+
+    // Unlock candidate
+    matchedResume.isUnlocked = true;
+    matchedResume.unlockedAt = new Date().toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+
+    company.resumesUsed = currentUsed + 1;
+    company.markModified('purchasedResumes');
+    await company.save();
+
+    const remaining = Math.max(0, totalCredits - company.resumesUsed);
+
+    res.json({
+      success: true,
+      message: `🎉 ${matchedResume.candidateName || 'Candidate'}'s contact details unlocked! 1 credit deducted.`,
+      resume: matchedResume,
+      resumesUsed: company.resumesUsed,
+      remainingCredits: remaining,
+      totalCredits,
+    });
+  } catch (error: any) {
+    console.error('unlockPurchasedResume error:', error);
+    res.status(500).json({ success: false, message: error.message || 'Failed to unlock resume' });
+  }
+  }
