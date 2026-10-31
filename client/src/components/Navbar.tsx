@@ -1021,66 +1021,75 @@ export default function Navbar({
       </div>
     )}
 
-    {/* Mobile Bottom Navigation Bar (Fixed at bottom on all mobile screens) */}
-    <nav
-      aria-label="Mobile Bottom Navigation"
-      className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-lg border-t border-slate-200/90 px-3 pt-2 pb-[max(0.6rem,env(safe-area-inset-bottom))] shadow-[0_-4px_25px_rgba(0,0,0,0.06)]"
-    >
-      <div className="flex items-center justify-around max-w-md mx-auto">
-        {/* 1. Home */}
-        <Link
-          href="/"
-          className={`flex flex-col items-center justify-center py-1 px-2 min-w-[54px] rounded-xl transition-all ${
-            pathname === "/"
-              ? "text-blue-600 font-bold"
-              : "text-slate-500 hover:text-slate-800 font-medium"
-          }`}
-        >
-          <Home className={`w-5 h-5 transition-transform ${pathname === "/" ? "fill-blue-600/20 stroke-[2.2]" : "stroke-[1.8]"}`} />
-          <span className="text-[11px] mt-1 tracking-tight">Home</span>
-        </Link>
+    {/* Mobile Bottom Navigation Bar (Fixed at bottom on all mobile screens, except Candidate Dashboard which handles tabs interactively) */}
+    {pathname !== "/candidate/dashboard" && (
+      <nav
+        aria-label="Mobile Bottom Navigation"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-lg border-t border-slate-200/90 px-3 pt-2 pb-[max(0.6rem,env(safe-area-inset-bottom))] shadow-[0_-4px_25px_rgba(0,0,0,0.06)]"
+      >
+        <div className="flex items-center justify-around max-w-md mx-auto">
+          {/* 1. Home */}
+          <Link
+            href="/"
+            className={`flex flex-col items-center justify-center py-1 px-2 min-w-[54px] rounded-xl transition-all ${
+              pathname === "/"
+                ? "text-blue-600 font-bold"
+                : "text-slate-500 hover:text-slate-800 font-medium"
+            }`}
+          >
+            <Home className={`w-5 h-5 transition-transform ${pathname === "/" ? "fill-blue-600/20 stroke-[2.2]" : "stroke-[1.8]"}`} />
+            <span className="text-[11px] mt-1 tracking-tight">Home</span>
+          </Link>
 
-        {/* 2. Jobs */}
-        <Link
-          href="/jobs"
-          className={`flex flex-col items-center justify-center py-1 px-2 min-w-[54px] rounded-xl transition-all ${
-            pathname.startsWith("/jobs") && !pathname.includes("saved")
-              ? "text-blue-600 font-bold"
-              : "text-slate-500 hover:text-slate-800 font-medium"
-          }`}
-        >
-          <Briefcase className={`w-5 h-5 transition-transform ${pathname.startsWith("/jobs") && !pathname.includes("saved") ? "stroke-[2.2]" : "stroke-[1.8]"}`} />
-          <span className="text-[11px] mt-1 tracking-tight">Jobs</span>
-        </Link>
+          {/* 2. Jobs */}
+          <Link
+            href="/jobs"
+            className={`flex flex-col items-center justify-center py-1 px-2 min-w-[54px] rounded-xl transition-all ${
+              pathname.startsWith("/jobs") && !pathname.includes("saved")
+                ? "text-blue-600 font-bold"
+                : "text-slate-500 hover:text-slate-800 font-medium"
+            }`}
+          >
+            <Briefcase className={`w-5 h-5 transition-transform ${pathname.startsWith("/jobs") && !pathname.includes("saved") ? "stroke-[2.2]" : "stroke-[1.8]"}`} />
+            <span className="text-[11px] mt-1 tracking-tight">Jobs</span>
+          </Link>
 
-        {/* 3. Saved */}
-        <Link
-          href="/jobs?filter=saved"
-          className={`flex flex-col items-center justify-center py-1 px-2 min-w-[54px] rounded-xl transition-all ${
-            pathname.includes("saved") || (pathname === "/jobs" && (typeof window !== "undefined" && window.location.search.includes("saved")))
-              ? "text-blue-600 font-bold"
-              : "text-slate-500 hover:text-slate-800 font-medium"
-          }`}
-        >
-          <Bookmark className={`w-5 h-5 transition-transform ${pathname.includes("saved") || (pathname === "/jobs" && (typeof window !== "undefined" && window.location.search.includes("saved"))) ? "fill-blue-600/20 stroke-[2.2]" : "stroke-[1.8]"}`} />
-          <span className="text-[11px] mt-1 tracking-tight">Saved</span>
-        </Link>
+          {/* 3. Saved */}
+          <Link
+            href={currentUser ? "/candidate/dashboard?tab=saved" : "/jobs?filter=saved"}
+            className={`flex flex-col items-center justify-center py-1 px-2 min-w-[54px] rounded-xl transition-all ${
+              pathname.includes("saved") || (pathname === "/jobs" && (typeof window !== "undefined" && window.location.search.includes("saved")))
+                ? "text-blue-600 font-bold"
+                : "text-slate-500 hover:text-slate-800 font-medium"
+            }`}
+          >
+            <Bookmark className={`w-5 h-5 transition-transform ${pathname.includes("saved") || (pathname === "/jobs" && (typeof window !== "undefined" && window.location.search.includes("saved"))) ? "fill-blue-600/20 stroke-[2.2]" : "stroke-[1.8]"}`} />
+            <span className="text-[11px] mt-1 tracking-tight">Saved</span>
+          </Link>
 
-        {/* 4. Profile */}
-        <button
-          type="button"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className={`flex flex-col items-center justify-center py-1 px-2 min-w-[54px] rounded-xl transition-all cursor-pointer ${
-            mobileMenuOpen || pathname === "/about"
-              ? "text-blue-600 font-bold"
-              : "text-slate-500 hover:text-slate-800 font-medium"
-          }`}
-        >
-          <User className="w-5 h-5 stroke-[1.8]" />
-          <span className="text-[11px] mt-1 tracking-tight">Profile</span>
-        </button>
-      </div>
-    </nav>
+          {/* 4. Profile */}
+          <Link
+            href={
+              currentUser
+                ? currentUser.role === "company"
+                  ? "/company/dashboard"
+                  : currentUser.role === "admin"
+                  ? "/admin"
+                  : "/candidate/dashboard"
+                : "/login"
+            }
+            className={`flex flex-col items-center justify-center py-1 px-2 min-w-[54px] rounded-xl transition-all cursor-pointer ${
+              pathname.startsWith("/candidate") || pathname.startsWith("/company") || pathname.startsWith("/admin")
+                ? "text-blue-600 font-bold"
+                : "text-slate-500 hover:text-slate-800 font-medium"
+            }`}
+          >
+            <User className={`w-5 h-5 transition-transform ${pathname.startsWith("/candidate") || pathname.startsWith("/company") ? "stroke-[2.2]" : "stroke-[1.8]"}`} />
+            <span className="text-[11px] mt-1 tracking-tight">Profile</span>
+          </Link>
+        </div>
+      </nav>
+    )}
   </>
   );
 }

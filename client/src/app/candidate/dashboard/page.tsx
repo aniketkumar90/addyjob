@@ -3920,60 +3920,64 @@ export default function CandidateDashboardPage() {
         </div>
       )}
 
-      {/* Mobile Bottom Navigation for Candidate */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-3 py-2 flex items-center justify-around shadow-lg">
-        <button
-          onClick={() => setActiveSidebarTab("profile")}
-          className={`flex flex-col items-center justify-center p-1 rounded-xl transition cursor-pointer ${
-            activeSidebarTab === "profile" ? "text-blue-600 font-bold" : "text-slate-500 hover:text-slate-800"
-          }`}
-        >
-          <User className="w-5 h-5" />
-          <span className="text-[10px] mt-0.5">Profile</span>
-        </button>
+      {/* Mobile Bottom Navigation for Candidate Dashboard (Matches App Design: Home | Jobs | Saved | Profile) */}
+      <nav
+        aria-label="Mobile Bottom Navigation"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-lg border-t border-slate-200/90 px-3 pt-2 pb-[max(0.6rem,env(safe-area-inset-bottom))] shadow-[0_-4px_25px_rgba(0,0,0,0.06)]"
+      >
+        <div className="flex items-center justify-around max-w-md mx-auto">
+          {/* 1. Home */}
+          <Link
+            href="/"
+            className="flex flex-col items-center justify-center py-1 px-2 min-w-[54px] rounded-xl transition-all text-slate-500 hover:text-slate-800 font-medium"
+          >
+            <Home className="w-5 h-5 stroke-[1.8] transition-transform" />
+            <span className="text-[11px] mt-1 tracking-tight">Home</span>
+          </Link>
 
-        <button
-          onClick={() => setActiveSidebarTab("applied")}
-          className={`relative flex flex-col items-center justify-center p-1 rounded-xl transition cursor-pointer ${
-            activeSidebarTab === "applied" ? "text-blue-600 font-bold" : "text-slate-500 hover:text-slate-800"
-          }`}
-        >
-          <Send className="w-5 h-5" />
-          {appliedJobsCount > 0 && (
-            <span className="absolute -top-0.5 right-0.5 w-3.5 h-3.5 rounded-full bg-blue-600 text-white text-[8px] font-bold flex items-center justify-center">
-              {appliedJobsCount}
-            </span>
-          )}
-          <span className="text-[10px] mt-0.5">Applied</span>
-        </button>
+          {/* 2. Jobs */}
+          <Link
+            href="/jobs"
+            className="flex flex-col items-center justify-center py-1 px-2 min-w-[54px] rounded-xl transition-all text-slate-500 hover:text-slate-800 font-medium"
+          >
+            <Briefcase className="w-5 h-5 stroke-[1.8] transition-transform" />
+            <span className="text-[11px] mt-1 tracking-tight">Jobs</span>
+          </Link>
 
-        <button
-          onClick={() => setActiveSidebarTab("saved")}
-          className={`relative flex flex-col items-center justify-center p-1 rounded-xl transition cursor-pointer ${
-            activeSidebarTab === "saved" ? "text-blue-600 font-bold" : "text-slate-500 hover:text-slate-800"
-          }`}
-        >
-          <Bookmark className="w-5 h-5" />
-          {savedJobsCount > 0 && (
-            <span className="absolute -top-0.5 right-0.5 w-3.5 h-3.5 rounded-full bg-blue-600 text-white text-[8px] font-bold flex items-center justify-center">
-              {savedJobsCount}
-            </span>
-          )}
-          <span className="text-[10px] mt-0.5">Saved</span>
-        </button>
+          {/* 3. Saved */}
+          <button
+            type="button"
+            onClick={() => setActiveSidebarTab("saved")}
+            className={`relative flex flex-col items-center justify-center py-1 px-2 min-w-[54px] rounded-xl transition-all cursor-pointer ${
+              activeSidebarTab === "saved"
+                ? "text-blue-600 font-bold"
+                : "text-slate-500 hover:text-slate-800 font-medium"
+            }`}
+          >
+            <Bookmark className={`w-5 h-5 transition-transform ${activeSidebarTab === "saved" ? "fill-blue-600/20 stroke-[2.2]" : "stroke-[1.8]"}`} />
+            {savedJobsCount > 0 && (
+              <span className="absolute top-0 right-2 w-3.5 h-3.5 rounded-full bg-blue-600 text-white text-[8px] font-bold flex items-center justify-center">
+                {savedJobsCount}
+              </span>
+            )}
+            <span className="text-[11px] mt-1 tracking-tight">Saved</span>
+          </button>
 
-        <button
-          onClick={() => setMobileSidebarOpen(true)}
-          title="Open menu (3 dots)"
-          aria-label="Open menu (3 dots)"
-          className="flex flex-col items-center justify-center p-1 text-slate-500 hover:text-blue-600 transition cursor-pointer group"
-        >
-          <div className="w-5 h-5 flex items-center justify-center">
-            <MoreHorizontal className="w-5 h-5 group-hover:scale-110 transition-transform" />
-          </div>
-          <span className="text-[10px] mt-0.5 font-medium group-hover:text-blue-600">Menu</span>
-        </button>
-      </div>
+          {/* 4. Profile */}
+          <button
+            type="button"
+            onClick={() => setActiveSidebarTab("profile")}
+            className={`flex flex-col items-center justify-center py-1 px-2 min-w-[54px] rounded-xl transition-all cursor-pointer ${
+              activeSidebarTab === "profile" || activeSidebarTab === "applied"
+                ? "text-blue-600 font-bold"
+                : "text-slate-500 hover:text-slate-800 font-medium"
+            }`}
+          >
+            <User className={`w-5 h-5 transition-transform ${activeSidebarTab === "profile" || activeSidebarTab === "applied" ? "stroke-[2.2]" : "stroke-[1.8]"}`} />
+            <span className="text-[11px] mt-1 tracking-tight">Profile</span>
+          </button>
+        </div>
+      </nav>
     </div>
   );
 }
