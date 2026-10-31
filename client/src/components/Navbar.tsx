@@ -916,60 +916,19 @@ export default function Navbar({
           </div>
 
           {mounted && currentUser ? (
-            /* Mobile Signed In Details */
-            <div className="pt-2 space-y-3">
-              <div className="p-3 bg-slate-50 rounded-2xl flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full overflow-hidden ring-1 ring-slate-200 flex items-center justify-center bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-bold text-xs">
-                    {currentUser.profileImage ? (
-                      <img
-                        src={currentUser.profileImage}
-                        alt="User Profile"
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <span>{getInitials(currentUser.name || currentUser.email || "U")}</span>
-                    )}
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold text-slate-800">
-                      {currentUser.name || "User"}
-                    </p>
-                    <p className="text-xs text-slate-500 truncate max-w-[170px]">
-                      {currentUser.email}
-                    </p>
-                  </div>
-                </div>
-                <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-blue-100 text-blue-700 uppercase">
-                  {currentUser.role === "job_seeker" ? "Candidate" : currentUser.role}
-                </span>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2">
-                <Link
-                  href={
-                    currentUser.role === "admin"
-                      ? "/admin"
-                      : currentUser.role === "company"
-                      ? "/company/dashboard"
-                      : "/candidate/dashboard"
-                  }
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="w-full flex items-center justify-center py-2 px-3 bg-blue-600 text-white rounded-xl text-xs font-bold transition shadow-sm"
-                >
-                  {currentUser.role === "job_seeker"
-                    ? "My Profile"
-                    : currentUser.role === "company"
-                    ? "Company Dashboard"
-                    : "Admin Portal"}
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  className="w-full flex items-center justify-center py-2 px-3 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-xl text-xs font-bold transition cursor-pointer"
-                >
-                  Log Out
-                </button>
-              </div>
+            /* Mobile Signed In Details - Log Out Only */
+            <div className="pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  handleLogout();
+                }}
+                className="w-full flex items-center justify-center gap-2 py-2.5 px-3 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl text-xs font-bold transition cursor-pointer"
+              >
+                <LogOut className="w-4 h-4 stroke-[2]" />
+                <span>Log Out</span>
+              </button>
             </div>
           ) : (
             /* Mobile Signed Out Details */
