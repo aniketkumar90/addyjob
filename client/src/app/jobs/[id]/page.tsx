@@ -717,7 +717,7 @@ function JobDetailPageContent() {
             </div>
 
             {/* Required Skills Badges */}
-            {job.tags && job.tags.length > 0 && (
+            {((job.tags && job.tags.length > 0) || (job.skills && job.skills.length > 0)) && (
               <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-[0_4px_20px_rgba(0,0,0,0.02)] space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">

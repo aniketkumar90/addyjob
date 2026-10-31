@@ -7,7 +7,6 @@ import {
   FileText,
   CreditCard,
   ArrowUpRight,
-  TrendingUp,
 } from "lucide-react";
 import { AdminTab } from "./AdminSidebar";
 
@@ -84,53 +83,53 @@ export default function MetricCards({ onSelectTab, pendingCount, stats }: Metric
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-5">
       {cards.map((card) => {
         const Icon = card.icon;
         return (
           <div
             key={card.title}
-            className={`bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] transition-all group flex flex-col justify-between ${card.accentBorder}`}
+            className={`bg-white rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] transition-all group flex flex-col justify-between ${card.accentBorder}`}
           >
             <div>
               {/* Top Row: Icon + Title */}
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 sm:gap-3">
                 <div
-                  className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${card.iconBg} transition-transform group-hover:scale-105`}
+                  className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0 ${card.iconBg} transition-transform group-hover:scale-105`}
                 >
-                  <Icon className="w-5 h-5" />
+                  <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
-                <span className="text-xs font-semibold text-slate-500">
+                <span className="text-[11px] sm:text-xs font-semibold text-slate-500 leading-tight">
                   {card.title}
                 </span>
               </div>
 
               {/* Value */}
-              <div className="mt-4 flex items-baseline gap-2.5">
-                <h3 className="text-2xl font-bold text-slate-900 tracking-tight font-sans">
+              <div className="mt-2.5 sm:mt-4 flex items-baseline gap-2">
+                <h3 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight font-sans">
                   {card.value}
                 </h3>
                 {(card as any).change && (
-                  <span className="inline-flex items-center gap-0.5 text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+                  <span className="inline-flex items-center gap-0.5 text-[10px] sm:text-xs font-semibold text-emerald-600 bg-emerald-50 px-1.5 sm:px-2 py-0.5 rounded-full">
                     {(card as any).change}
                   </span>
                 )}
               </div>
 
               {/* Subtext */}
-              <p className="mt-1 text-xs text-slate-400 font-medium">
+              <p className="mt-1 text-[10px] sm:text-xs text-slate-400 font-medium line-clamp-1">
                 {card.subtext}
               </p>
             </div>
 
             {/* Bottom Link Action */}
-            <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+            <div className="mt-3 sm:mt-4 pt-2 sm:pt-3 border-t border-slate-100 flex items-center justify-between">
               <button
                 onClick={() => onSelectTab(card.id)}
-                className="text-xs font-semibold text-blue-600 hover:text-blue-700 hover:underline transition-colors cursor-pointer flex items-center gap-1 group-hover:gap-1.5 duration-200"
+                className="text-[11px] sm:text-xs font-semibold text-blue-600 hover:text-blue-700 hover:underline transition-colors cursor-pointer flex items-center gap-1 group-hover:gap-1.5 duration-200"
               >
                 <span>{card.actionLabel}</span>
-                <ArrowUpRight className="w-3.5 h-3.5" />
+                <ArrowUpRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
               </button>
             </div>
           </div>

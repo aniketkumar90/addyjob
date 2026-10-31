@@ -1007,7 +1007,7 @@ function JobsContent() {
                   </div>
 
                   {/* Location & Meta info */}
-                  <div className="flex flex-wrap items-center gap-4 text-xs text-slate-500 my-3">
+                  <div className="flex flex-wrap items-center gap-4 text-xs text-slate-500 mt-3">
                     <span className="flex items-center gap-1">
                       <MapPin className="w-3.5 h-3.5 text-slate-400" />
                       {job.location || "Remote"}
@@ -1021,20 +1021,6 @@ function JobsContent() {
                       {jPosted}
                     </span>
                   </div>
-
-                  {/* Skills Tags */}
-                  {jTags.length > 0 && (
-                    <div className="flex flex-wrap gap-2 my-4">
-                      {jTags.map((t: string) => (
-                        <span
-                          key={t}
-                          className="px-2.5 py-1 rounded-md text-[11px] font-medium bg-slate-100 text-slate-600"
-                        >
-                          {t}
-                        </span>
-                      ))}
-                    </div>
-                  )}
                 </div>
               </Link>
             );

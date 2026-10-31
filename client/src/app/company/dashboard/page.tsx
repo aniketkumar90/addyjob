@@ -4422,22 +4422,17 @@ export default function CompanyDashboardPage() {
 
           {/* TAB 4: APPLICATIONS (Uspar Kitne Applications Aye Hai, Hire / Reject) */}
           {activeTab === "applicants" && (
-            <div className="space-y-6 animate-in fade-in duration-200">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200/80">
+            <div className="space-y-4 sm:space-y-6 animate-in fade-in duration-200">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 pb-4 border-b border-slate-200/80">
                 <div>
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-xl font-black text-slate-900">Candidate Applications</h2>
-                    <span className="sm:hidden text-[9px] font-bold text-[#7C3AED] bg-[#EDE9FE] px-2 py-0.5 rounded-full border border-[#DDD6FE]">
-                      Scroll →
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-500">
+                  <h2 className="text-lg sm:text-xl font-black text-slate-900">Candidate Applications</h2>
+                  <p className="text-xs text-slate-500 mt-0.5">
                     Review submissions and manage candidate application status.
                   </p>
                 </div>
 
-                {/* Status Filter Tabs */}
-                <div className="flex items-center gap-1.5 overflow-x-auto max-w-full bg-slate-100 p-1.5 rounded-2xl border border-slate-200 shrink-0">
+                {/* Status Filter Tabs (Scrollbar hidden cleanly) */}
+                <div className="flex items-center gap-1.5 overflow-x-auto max-w-full bg-slate-100 p-1.5 rounded-2xl border border-slate-200 shrink-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                   {(
                     [
                       "ALL",
@@ -4450,7 +4445,7 @@ export default function CompanyDashboardPage() {
                     <button
                       key={st}
                       onClick={() => setApplicantFilter(st)}
-                      className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer whitespace-nowrap shrink-0 ${
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer whitespace-nowrap shrink-0 ${
                         applicantFilter === st
                           ? "bg-white text-[#7C3AED] shadow-sm"
                           : "text-slate-600 hover:text-slate-900"
@@ -4462,134 +4457,150 @@ export default function CompanyDashboardPage() {
                 </div>
               </div>
 
-              {/* Applicant Cards List - Horizontally scrollable on mobile */}
-              <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0 pb-3">
-                <div className="space-y-4 w-max min-w-full lg:w-full min-w-[1100px] lg:min-w-0 pr-3 sm:pr-0">
-                  {filteredApplicants.length === 0 ? (
-                    <div className="p-12 text-center rounded-3xl bg-white border border-slate-200/80 shadow-xs">
-                      <Users className="w-12 h-12 text-slate-400 mx-auto mb-3" />
-                      <p className="text-sm font-bold text-slate-900">No applications match this filter</p>
-                      <p className="text-xs text-slate-500 mt-1">
-                        Try selecting another status tab or clear the search query.
-                      </p>
-                    </div>
-                  ) : (
-                    filteredApplicants.map((app) => (
-                      <div
-                        key={app.id}
-                        className="p-4 sm:p-5 rounded-2xl sm:rounded-3xl bg-white border border-slate-200/80 hover:border-[#DDD6FE] transition shadow-xs flex items-center justify-between gap-6 whitespace-nowrap w-full min-w-[1100px] lg:min-w-0"
-                      >
-                        {/* Left Candidate Info */}
-                        <div className="flex items-center gap-3.5 sm:gap-4 shrink-0">
-                          <div
-                            style={{ backgroundColor: "#EDE9FE", color: "#6D28D9", borderColor: "#DDD6FE" }}
-                            className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl border font-black text-base sm:text-lg flex items-center justify-center shrink-0 shadow-xs"
-                          >
-                            {app.candidateName.slice(0, 2).toUpperCase()}
+              {/* Applicant Cards List - 100% Responsive on Mobile (Zero Horizontal Scrolling) */}
+              <div className="space-y-3.5 sm:space-y-4 w-full">
+                {filteredApplicants.length === 0 ? (
+                  <div className="p-10 sm:p-12 text-center rounded-2xl sm:rounded-3xl bg-white border border-slate-200/80 shadow-xs">
+                    <Users className="w-12 h-12 text-slate-400 mx-auto mb-3" />
+                    <p className="text-sm font-bold text-slate-900">No applications match this filter</p>
+                    <p className="text-xs text-slate-500 mt-1">
+                      Try selecting another status tab or clear the search query.
+                    </p>
+                  </div>
+                ) : (
+                  filteredApplicants.map((app) => (
+                    <div
+                      key={app.id}
+                      className="p-4 sm:p-5 rounded-2xl sm:rounded-3xl bg-white border border-slate-200/80 hover:border-[#DDD6FE] transition shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4 w-full"
+                    >
+                      {/* Left Candidate Info */}
+                      <div className="flex items-start sm:items-center gap-3.5 min-w-0 flex-1">
+                        <div
+                          style={{ backgroundColor: "#EDE9FE", color: "#6D28D9", borderColor: "#DDD6FE" }}
+                          className="w-12 h-12 rounded-2xl border font-black text-base flex items-center justify-center shrink-0 shadow-xs"
+                        >
+                          {app.candidateName.slice(0, 2).toUpperCase()}
+                        </div>
+
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                            <h3 className="text-sm sm:text-base font-black text-slate-900 truncate">
+                              {app.candidateName}
+                            </h3>
+                            <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
+                              {app.matchScore}% Match Score
+                            </span>
+                            <span
+                              className={`text-[10px] font-black px-2 py-0.5 rounded-full uppercase shrink-0 ${
+                                app.status === "Hired"
+                                  ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                  : app.status === "Rejected"
+                                  ? "bg-rose-50 text-rose-700 border border-rose-200"
+                                  : app.status === "Interview"
+                                  ? "bg-purple-50 text-purple-700 border border-purple-200"
+                                  : app.status === "Shortlisted"
+                                  ? "bg-amber-50 text-amber-700 border border-amber-200"
+                                  : "bg-[#EDE9FE] text-[#7C3AED] border border-[#DDD6FE]"
+                              }`}
+                            >
+                              {app.status}
+                            </span>
                           </div>
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <h3 className="text-sm sm:text-base font-black text-slate-900 whitespace-nowrap">
-                                {app.candidateName}
-                              </h3>
-                              <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 whitespace-nowrap">
-                                {app.matchScore}% Match Score
-                              </span>
-                              <span
-                                className={`text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase whitespace-nowrap ${
-                                  app.status === "Hired"
-                                    ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                                    : app.status === "Rejected"
-                                    ? "bg-rose-50 text-rose-700 border border-rose-200"
-                                    : app.status === "Interview"
-                                    ? "bg-purple-50 text-purple-700 border border-purple-200"
-                                    : app.status === "Shortlisted"
-                                    ? "bg-amber-50 text-amber-700 border border-amber-200"
-                                    : "bg-[#EDE9FE] text-[#7C3AED] border border-[#DDD6FE]"
-                                }`}
-                              >
-                                {app.status}
-                              </span>
-                            </div>
 
-                            <p className="text-xs text-slate-600 font-semibold mt-1 whitespace-nowrap">
-                              Applied For: <span className="text-slate-900">{app.appliedRole}</span>
-                            </p>
+                          <p className="text-xs text-slate-600 font-semibold mt-1">
+                            Applied For: <span className="text-slate-900 font-bold">{app.appliedRole}</span>
+                          </p>
 
-                            <div className="flex items-center gap-3 text-[11px] text-slate-400 mt-1 whitespace-nowrap">
+                          {/* Candidate Meta info */}
+                          <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px] text-slate-500 mt-1.5">
+                            {app.experience && (
                               <span className="flex items-center gap-1 text-slate-600">
-                                <Briefcase className="w-3.5 h-3.5 text-slate-400" />
-                                {app.experience}
+                                <Briefcase className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                                <span>{app.experience}</span>
                               </span>
-                              <span>•</span>
-                              <span className="flex items-center gap-1 text-slate-600">
-                                <MapPin className="w-3.5 h-3.5 text-slate-400" />
-                                {app.location}
-                              </span>
-                              <span>•</span>
-                              <span className="flex items-center gap-1 text-slate-600">
-                                <Mail className="w-3.5 h-3.5 text-slate-400" />
-                                {app.email}
-                              </span>
-                              <span>•</span>
-                              <span className="flex items-center gap-1 text-slate-600">
-                                <Phone className="w-3.5 h-3.5 text-slate-400" />
-                                {app.phone}
-                              </span>
-                            </div>
+                            )}
+                            {app.location && (
+                              <>
+                                <span className="text-slate-300">•</span>
+                                <span className="flex items-center gap-1 text-slate-600">
+                                  <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                                  <span>{app.location}</span>
+                                </span>
+                              </>
+                            )}
+                            {app.email && (
+                              <>
+                                <span className="text-slate-300">•</span>
+                                <span className="flex items-center gap-1 text-slate-600 truncate max-w-[170px] sm:max-w-none">
+                                  <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                                  <span className="truncate">{app.email}</span>
+                                </span>
+                              </>
+                            )}
+                            {app.phone && (
+                              <>
+                                <span className="text-slate-300">•</span>
+                                <span className="flex items-center gap-1 text-slate-600">
+                                  <Phone className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                                  <span>{app.phone}</span>
+                                </span>
+                              </>
+                            )}
+                          </div>
 
-                            {/* Skills Pills */}
-                            <div className="flex items-center gap-1.5 mt-2 whitespace-nowrap">
+                          {/* Skills Pills */}
+                          {app.skills && app.skills.length > 0 && (
+                            <div className="flex flex-wrap items-center gap-1.5 mt-2">
                               {app.skills.map((s, i) => (
                                 <span
                                   key={i}
-                                  className="px-2.5 py-0.5 rounded-lg text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200 whitespace-nowrap"
+                                  className="px-2 py-0.5 rounded-lg text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200"
                                 >
                                   {s}
                                 </span>
                               ))}
                             </div>
-                          </div>
-                        </div>
-
-                        {/* Right Action Buttons */}
-                        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 pl-4 whitespace-nowrap">
-                          <button
-                            onClick={() => handleViewResume(app)}
-                            className="px-3 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold border border-slate-200 transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap shadow-2xs"
-                          >
-                            <FileText className="w-3.5 h-3.5 text-[#7C3AED]" />
-                            <span>View Resume</span>
-                          </button>
-
-                          <button
-                            onClick={() => handleUpdateStatus(app.id, "Shortlisted")}
-                            className={`px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer whitespace-nowrap shadow-2xs ${
-                              app.status === "Shortlisted"
-                                ? "bg-amber-100 text-amber-800 border border-amber-300"
-                                : "bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200"
-                            }`}
-                          >
-                            {app.status === "Shortlisted" ? "Shortlisted ✓" : "Shortlist"}
-                          </button>
-
-                          {/* REJECT BUTTON */}
-                          <button
-                            onClick={() => handleUpdateStatus(app.id, "Rejected")}
-                            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap shadow-2xs ${
-                              app.status === "Rejected"
-                                ? "bg-rose-600 text-white border border-rose-600"
-                                : "bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white border border-rose-200"
-                            }`}
-                          >
-                            <UserX className="w-4 h-4" />
-                            <span>{app.status === "Rejected" ? "Rejected" : "Reject"}</span>
-                          </button>
+                          )}
                         </div>
                       </div>
-                    ))
-                  )}
-                </div>
+
+                      {/* Action Buttons: 3 clean equal buttons in one row on mobile, inline on desktop */}
+                      <div className="grid grid-cols-3 sm:flex items-center gap-2 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100 shrink-0">
+                        <button
+                          onClick={() => handleViewResume(app)}
+                          className="px-2.5 sm:px-3 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold border border-slate-200 transition flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+                        >
+                          <FileText className="w-3.5 h-3.5 text-[#7C3AED] shrink-0" />
+                          <span className="truncate">Resume</span>
+                        </button>
+
+                        <button
+                          onClick={() => handleUpdateStatus(app.id, "Shortlisted")}
+                          className={`px-2.5 sm:px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer text-center truncate shadow-2xs ${
+                            app.status === "Shortlisted"
+                              ? "bg-amber-100 text-amber-800 border border-amber-300"
+                              : "bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200"
+                          }`}
+                        >
+                          <span className="truncate">{app.status === "Shortlisted" ? "Shortlisted ✓" : "Shortlist"}</span>
+                        </button>
+
+                        {/* REJECT BUTTON */}
+                        <button
+                          onClick={() => handleUpdateStatus(app.id, "Rejected")}
+                          className={`px-2.5 sm:px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer truncate shadow-2xs ${
+                            app.status === "Rejected"
+                              ? "bg-rose-600 text-white border border-rose-600"
+                              : "bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white border border-rose-200"
+                          }`}
+                        >
+                          <UserX className="w-3.5 h-3.5 shrink-0" />
+                          <span className="truncate">{app.status === "Rejected" ? "Rejected" : "Reject"}</span>
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           )}
