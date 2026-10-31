@@ -1989,7 +1989,13 @@ export default function CandidateDashboardPage() {
       )}
 
       {/* OFFICIAL JOB SEEKER NAVBAR */}
-      <Navbar activeTab="Dashboard" />
+      <Navbar
+        activeTab="Dashboard"
+        onSelectCandidateTab={(tab) => setActiveSidebarTab(tab)}
+        activeCandidateTab={activeSidebarTab}
+        appliedCount={appliedJobsCount}
+        savedCount={savedJobsCount}
+      />
 
       {/* CANDIDATE MOBILE DRAWER (Phone View) */}
       {mobileSidebarOpen && (
@@ -2168,42 +2174,7 @@ export default function CandidateDashboardPage() {
 
         {/* MAIN DASHBOARD CONTENT AREA */}
         <main className="flex-1 flex flex-col gap-6 min-w-0">
-          {/* Mobile Navigation Tabs Bar */}
-          <div className="lg:hidden flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none w-full">
-            <button
-              onClick={() => setActiveSidebarTab("profile")}
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap shrink-0 transition ${
-                activeSidebarTab === "profile"
-                  ? "bg-blue-600 text-white shadow-xs"
-                  : "bg-white text-slate-600 border border-slate-200"
-              }`}
-            >
-              <User className="w-3.5 h-3.5" />
-              <span>My Profile</span>
-            </button>
-            <button
-              onClick={() => setActiveSidebarTab("applied")}
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap shrink-0 transition ${
-                activeSidebarTab === "applied"
-                  ? "bg-blue-600 text-white shadow-xs"
-                  : "bg-white text-slate-600 border border-slate-200"
-              }`}
-            >
-              <Send className="w-3.5 h-3.5" />
-              <span>Applied {appliedJobsCount > 0 ? `(${appliedJobsCount})` : ""}</span>
-            </button>
-            <button
-              onClick={() => setActiveSidebarTab("saved")}
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap shrink-0 transition ${
-                activeSidebarTab === "saved"
-                  ? "bg-blue-600 text-white shadow-xs"
-                  : "bg-white text-slate-600 border border-slate-200"
-              }`}
-            >
-              <Bookmark className="w-3.5 h-3.5" />
-              <span>Saved {savedJobsCount > 0 ? `(${savedJobsCount})` : ""}</span>
-            </button>
-          </div>
+
 
           {/* TAB 1: APPLIED JOBS (Exact Match to Reference Image 2) */}
           {activeSidebarTab === "applied" && (
