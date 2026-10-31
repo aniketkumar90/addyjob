@@ -10,6 +10,8 @@ import Footer from "@/components/Footer";
 
 import { fetchPublicCompanies, fetchPublicJobs } from "@/lib/api";
 
+export const dynamic = 'force-dynamic';
+
 export default async function Home() {
   const [initialCompanies, initialJobs] = await Promise.all([
     fetchPublicCompanies().catch(() => []),
@@ -38,16 +40,16 @@ export default async function Home() {
 
         {/* 5. Trusted by Top Companies & Top Companies Cards */}
         <div className="order-3">
-          <TopCompanies initialCompanies={initialCompanies} />
+          <TopCompanies />
           <TopCompaniesCards initialCompanies={initialCompanies} />
         </div>
 
-        {/* 6. Get Hired in 4 Easy Steps (Hidden on mobile) */}
-        <div className="hidden md:block order-4">
+        {/* 6. How It Works */}
+        <div className="order-4">
           <HowItWorks />
         </div>
 
-        {/* 7. Success Stories & CTA Banner */}
+        {/* 7. Testimonials & CTA */}
         <div className="order-5">
           <TestimonialsAndCTA />
         </div>

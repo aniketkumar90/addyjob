@@ -278,7 +278,7 @@ export async function cachedFetch<T>(
   }
 
   const cacheKey = url;
-  const now = Date.now();
+  const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
 
   if (!forceRefresh && ttlMs > 0) {
     const cached = memoryCache.get(cacheKey);
@@ -304,7 +304,7 @@ export async function cachedFetch<T>(
       }
       const data = await res.json();
       if (ttlMs > 0) {
-        memoryCache.set(cacheKey, { data, timestamp: Date.now() });
+        memoryCache.set(cacheKey, { data, timestamp: typeof performance !== 'undefined' ? performance.now() : Date.now() });
       }
       return data;
     } finally {
