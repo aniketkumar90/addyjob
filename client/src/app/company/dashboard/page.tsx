@@ -4625,29 +4625,25 @@ export default function CompanyDashboardPage() {
               </div>
 
               {/* Credits Balance Card */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="p-5 rounded-3xl bg-white border border-slate-200/80 shadow-xs">
-                  <span className="text-[11px] font-bold text-slate-500">Total Credits Purchased</span>
-                  <p className="text-3xl font-black text-slate-900 mt-1">{totalResumesPurchased}</p>
-                  <p className="text-xs text-slate-500 mt-1">From active subscription & credit packs</p>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                <div className="p-4 sm:p-5 rounded-2xl sm:rounded-3xl bg-white border border-slate-200/80 shadow-xs">
+                  <span className="text-[11px] sm:text-xs font-bold text-slate-500 block leading-tight">Total Credits Purchased</span>
+                  <p className="text-2xl sm:text-3xl font-black text-slate-900 mt-1">{totalResumesPurchased}</p>
                 </div>
 
-                <div className="p-5 rounded-3xl bg-white border border-slate-200/80 shadow-xs">
-                  <span className="text-[11px] font-bold text-slate-500">Total Resumes In Vault</span>
-                  <p className="text-3xl font-black text-slate-900 mt-1">{purchasedResumes.length}</p>
-                  <p className="text-xs text-slate-500 mt-1">Available candidate profiles</p>
+                <div className="p-4 sm:p-5 rounded-2xl sm:rounded-3xl bg-white border border-slate-200/80 shadow-xs">
+                  <span className="text-[11px] sm:text-xs font-bold text-slate-500 block leading-tight">Total Resumes In Vault</span>
+                  <p className="text-2xl sm:text-3xl font-black text-slate-900 mt-1">{purchasedResumes.length}</p>
                 </div>
 
-                <div className="p-5 rounded-3xl bg-white border border-slate-200/80 shadow-xs">
-                  <span className="text-[11px] font-bold text-slate-500">Resumes Unlocked</span>
-                  <p className="text-3xl font-black text-[#6D28D9] mt-1">{purchasedResumes.filter((r) => r.isUnlocked).length}</p>
-                  <p className="text-xs text-slate-500 mt-1">Unlocked candidate contacts</p>
+                <div className="p-4 sm:p-5 rounded-2xl sm:rounded-3xl bg-white border border-slate-200/80 shadow-xs">
+                  <span className="text-[11px] sm:text-xs font-bold text-slate-500 block leading-tight">Resumes Unlocked</span>
+                  <p className="text-2xl sm:text-3xl font-black text-[#6D28D9] mt-1">{purchasedResumes.filter((r) => r.isUnlocked).length}</p>
                 </div>
 
-                <div className="p-5 rounded-3xl bg-emerald-50/50 border border-emerald-200 shadow-xs">
-                  <span className="text-[11px] font-bold text-emerald-700">Available Credit Balance</span>
-                  <p className="text-3xl font-black text-emerald-600 mt-1">{remainingCredits}</p>
-                  <p className="text-xs text-slate-600 mt-1">Ready to unlock new talent profiles</p>
+                <div className="p-4 sm:p-5 rounded-2xl sm:rounded-3xl bg-emerald-50/50 border border-emerald-200 shadow-xs">
+                  <span className="text-[11px] sm:text-xs font-bold text-emerald-700 block leading-tight">Available Credit Balance</span>
+                  <p className="text-2xl sm:text-3xl font-black text-emerald-600 mt-1">{remainingCredits}</p>
                 </div>
               </div>
 

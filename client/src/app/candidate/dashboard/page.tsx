@@ -1000,7 +1000,16 @@ export default function CandidateDashboardPage() {
     setActiveQuickLink(linkKey);
     const el = document.getElementById(id);
     if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      const navElement = document.querySelector("nav.sticky") || document.querySelector("nav");
+      const navHeight = navElement ? navElement.getBoundingClientRect().height : 80;
+      const offset = navHeight + 20;
+      const elementPosition = el.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - offset;
+
+      window.scrollTo({
+        top: Math.max(0, offsetPosition),
+        behavior: "smooth",
+      });
     }
   };
 
@@ -2228,7 +2237,7 @@ export default function CandidateDashboardPage() {
               {/* TOP PROFILE HERO CARD (Image 1 style) */}
               <div
                 id="overview-section"
-                className="bg-white rounded-3xl border border-slate-200/80 p-5 sm:p-7 shadow-xs relative"
+                className="bg-white rounded-3xl border border-slate-200/80 p-5 sm:p-7 shadow-xs relative scroll-mt-24 sm:scroll-mt-28"
               >
                 <div className="flex items-start gap-4 sm:gap-5 min-w-0">
                   <div className="relative shrink-0">
@@ -2339,7 +2348,7 @@ export default function CandidateDashboardPage() {
               {/* SECTION: RESUME */}
               <div
                 id="resume-section"
-                className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-4"
+                className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-4 scroll-mt-24 sm:scroll-mt-28"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
@@ -2404,7 +2413,7 @@ export default function CandidateDashboardPage() {
               {/* SECTION: KEY SKILLS */}
               <div
                 id="key-skills-section"
-                className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-4"
+                className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-4 scroll-mt-24 sm:scroll-mt-28"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
@@ -2466,7 +2475,7 @@ export default function CandidateDashboardPage() {
               {/* SECTION: EMPLOYMENT HISTORY */}
               <div
                 id="employment-section"
-                className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-4"
+                className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-4 scroll-mt-24 sm:scroll-mt-28"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
@@ -2541,7 +2550,7 @@ export default function CandidateDashboardPage() {
               {/* SECTION: EDUCATION */}
               <div
                 id="education-section"
-                className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-4"
+                className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-4 scroll-mt-24 sm:scroll-mt-28"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
@@ -2614,7 +2623,7 @@ export default function CandidateDashboardPage() {
                 {/* IT Skills Card */}
                 <div
                   id="it-skills-section"
-                  className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-4"
+                  className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-4 scroll-mt-24 sm:scroll-mt-28"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
@@ -2652,7 +2661,7 @@ export default function CandidateDashboardPage() {
                 {/* Projects Card */}
                 <div
                   id="projects-section"
-                  className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-4"
+                  className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-4 scroll-mt-24 sm:scroll-mt-28"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
@@ -2756,7 +2765,7 @@ export default function CandidateDashboardPage() {
               {/* PROFILE SUMMARY */}
               <div
                 id="profile-summary-section"
-                className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-3"
+                className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-3 scroll-mt-24 sm:scroll-mt-28"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
@@ -2782,7 +2791,7 @@ export default function CandidateDashboardPage() {
                 {/* Personal Details Card */}
                 <div
                   id="personal-details-section"
-                  className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-4"
+                  className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-4 scroll-mt-24 sm:scroll-mt-28"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
@@ -2827,7 +2836,7 @@ export default function CandidateDashboardPage() {
                 {/* Languages Card */}
                 <div
                   id="languages-section"
-                  className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-4"
+                  className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-4 scroll-mt-24 sm:scroll-mt-28"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">

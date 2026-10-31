@@ -160,7 +160,16 @@ function CompanyDetailPageContent() {
     setActiveTab(tab);
     const element = document.getElementById(id);
     if (element) {
-      element.scrollIntoView({ behavior: "smooth", block: "start" });
+      const navElement = document.querySelector("nav.sticky") || document.querySelector("nav");
+      const navHeight = navElement ? navElement.getBoundingClientRect().height : 80;
+      const offset = navHeight + 20;
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - offset;
+
+      window.scrollTo({
+        top: Math.max(0, offsetPosition),
+        behavior: "smooth",
+      });
     }
   };
 
