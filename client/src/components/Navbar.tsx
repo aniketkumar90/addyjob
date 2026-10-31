@@ -81,6 +81,23 @@ export default function Navbar({
   const [navSearchQuery, setNavSearchQuery] = useState("");
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [optimisticTab, setOptimisticTab] = useState<string | null>(null);
+
+  // Reset optimistic tab when route changes
+  useEffect(() => {
+    setOptimisticTab(null);
+  }, [pathname]);
+
+  // Aggressive route prefetching for instant mobile bottom navigation
+  useEffect(() => {
+    try {
+      router.prefetch("/");
+      router.prefetch("/jobs");
+      router.prefetch("/candidate/dashboard");
+      router.prefetch("/candidate/dashboard?tab=saved");
+      router.prefetch("/login");
+    } catch {}
+  }, [router]);
 
   const notificationsRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
@@ -1085,72 +1102,114 @@ export default function Navbar({
       </div>
     )}
 
-    {/* Mobile Bottom Navigation Bar (Fixed at bottom on all mobile screens, except Candidate Dashboard which handles tabs interactively) */}
+    {/* Mobile Bottom Navigation Bar (High-speed, zero-delay touch navigation) */}
     {pathname !== "/candidate/dashboard" && (
       <nav
         aria-label="Mobile Bottom Navigation"
-        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-lg border-t border-slate-200/90 px-3 pt-2 pb-[max(0.6rem,env(safe-area-inset-bottom))] shadow-[0_-4px_25px_rgba(0,0,0,0.06)]"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-lg border-t border-slate-200/90 px-3 pt-2 pb-[max(0.6rem,env(safe-area-inset-bottom))] shadow-[0_-4px_25px_rgba(0,0,0,0.06)] touch-manipulation"
       >
         <div className="flex items-center justify-around max-w-md mx-auto">
           {/* 1. Home */}
-          <Link
-            href="/"
-            className={`flex flex-col items-center justify-center py-1 px-2 min-w-[54px] rounded-xl transition-all ${
-              pathname === "/"
-                ? "text-blue-600 font-bold"
-                : "text-slate-500 hover:text-slate-800 font-medium"
-            }`}
-          >
-            <Home className={`w-5 h-5 transition-transform ${pathname === "/" ? "fill-blue-600/20 stroke-[2.2]" : "stroke-[1.8]"}`} />
-            <span className="text-[11px] mt-1 tracking-tight">Home</span>
-          </Link>
+          {(() => {
+            const isHomeActive = optimisticTab ? optimisticTab === "home" : pathname === "/";
+            return (
+              <Link
+                href="/"
+                prefetch={true}
+                onClick={() => setOptimisticTab("home")}
+                onPointerDown={() => { try { router.prefetch("/"); } catch {} }}
+                onTouchStart={() => { try { router.prefetch("/"); } catch {} }}
+                className={`touch-nav-btn flex flex-col items-center justify-center py-1 px-2 min-w-[54px] rounded-xl transition-all duration-75 active:scale-90 active:bg-blue-50/70 select-none ${
+                  isHomeActive
+                    ? "text-blue-600 font-bold"
+                    : "text-slate-500 hover:text-slate-800 font-medium"
+                }`}
+              >
+                <Home className={`w-5 h-5 transition-transform duration-75 ${isHomeActive ? "fill-blue-600/20 stroke-[2.2] scale-105" : "stroke-[1.8]"}`} />
+                <span className="text-[11px] mt-1 tracking-tight">Home</span>
+              </Link>
+            );
+          })()}
 
           {/* 2. Jobs */}
-          <Link
-            href="/jobs"
-            className={`flex flex-col items-center justify-center py-1 px-2 min-w-[54px] rounded-xl transition-all ${
-              pathname.startsWith("/jobs") && !pathname.includes("saved")
-                ? "text-blue-600 font-bold"
-                : "text-slate-500 hover:text-slate-800 font-medium"
-            }`}
-          >
-            <Briefcase className={`w-5 h-5 transition-transform ${pathname.startsWith("/jobs") && !pathname.includes("saved") ? "stroke-[2.2]" : "stroke-[1.8]"}`} />
-            <span className="text-[11px] mt-1 tracking-tight">Jobs</span>
-          </Link>
+          {(() => {
+            const isJobsActive = optimisticTab
+              ? optimisticTab === "jobs"
+              : pathname.startsWith("/jobs") && !pathname.includes("saved") && (typeof window === "undefined" || !window.location.search.includes("saved"));
+            return (
+              <Link
+                href="/jobs"
+                prefetch={true}
+                onClick={() => setOptimisticTab("jobs")}
+                onPointerDown={() => { try { router.prefetch("/jobs"); } catch {} }}
+                onTouchStart={() => { try { router.prefetch("/jobs"); } catch {} }}
+                className={`touch-nav-btn flex flex-col items-center justify-center py-1 px-2 min-w-[54px] rounded-xl transition-all duration-75 active:scale-90 active:bg-blue-50/70 select-none ${
+                  isJobsActive
+                    ? "text-blue-600 font-bold"
+                    : "text-slate-500 hover:text-slate-800 font-medium"
+                }`}
+              >
+                <Briefcase className={`w-5 h-5 transition-transform duration-75 ${isJobsActive ? "stroke-[2.2] scale-105" : "stroke-[1.8]"}`} />
+                <span className="text-[11px] mt-1 tracking-tight">Jobs</span>
+              </Link>
+            );
+          })()}
 
           {/* 3. Saved */}
-          <Link
-            href={currentUser ? "/candidate/dashboard?tab=saved" : "/jobs?filter=saved"}
-            className={`flex flex-col items-center justify-center py-1 px-2 min-w-[54px] rounded-xl transition-all ${
-              pathname.includes("saved") || (pathname === "/jobs" && (typeof window !== "undefined" && window.location.search.includes("saved")))
-                ? "text-blue-600 font-bold"
-                : "text-slate-500 hover:text-slate-800 font-medium"
-            }`}
-          >
-            <Bookmark className={`w-5 h-5 transition-transform ${pathname.includes("saved") || (pathname === "/jobs" && (typeof window !== "undefined" && window.location.search.includes("saved"))) ? "fill-blue-600/20 stroke-[2.2]" : "stroke-[1.8]"}`} />
-            <span className="text-[11px] mt-1 tracking-tight">Saved</span>
-          </Link>
+          {(() => {
+            const isSavedActive = optimisticTab
+              ? optimisticTab === "saved"
+              : pathname.includes("saved") || (pathname === "/jobs" && (typeof window !== "undefined" && window.location.search.includes("saved")));
+            const savedHref = currentUser ? "/candidate/dashboard?tab=saved" : "/jobs?filter=saved";
+            return (
+              <Link
+                href={savedHref}
+                prefetch={true}
+                onClick={() => setOptimisticTab("saved")}
+                onPointerDown={() => { try { router.prefetch(savedHref); } catch {} }}
+                onTouchStart={() => { try { router.prefetch(savedHref); } catch {} }}
+                className={`touch-nav-btn flex flex-col items-center justify-center py-1 px-2 min-w-[54px] rounded-xl transition-all duration-75 active:scale-90 active:bg-blue-50/70 select-none ${
+                  isSavedActive
+                    ? "text-blue-600 font-bold"
+                    : "text-slate-500 hover:text-slate-800 font-medium"
+                }`}
+              >
+                <Bookmark className={`w-5 h-5 transition-transform duration-75 ${isSavedActive ? "fill-blue-600/20 stroke-[2.2] scale-105" : "stroke-[1.8]"}`} />
+                <span className="text-[11px] mt-1 tracking-tight">Saved</span>
+              </Link>
+            );
+          })()}
 
           {/* 4. Profile */}
-          <Link
-            href={
-              currentUser
-                ? currentUser.role === "company"
-                  ? "/company/dashboard"
-                  : currentUser.role === "admin"
-                  ? "/admin"
-                  : "/candidate/dashboard"
-                : "/login"
-            }
-            className={`flex flex-col items-center justify-center py-1 px-2 min-w-[54px] rounded-xl transition-all cursor-pointer ${
-              pathname.startsWith("/candidate") || pathname.startsWith("/company") || pathname.startsWith("/admin")
-                ? "text-blue-600 font-bold"
-                : "text-slate-500 hover:text-slate-800 font-medium"
-            }`}
-          >
-            <User className={`w-5 h-5 transition-transform ${pathname.startsWith("/candidate") || pathname.startsWith("/company") ? "stroke-[2.2]" : "stroke-[1.8]"}`} />
-            <span className="text-[11px] mt-1 tracking-tight">Profile</span>
-          </Link>
+          {(() => {
+            const isProfileActive = optimisticTab
+              ? optimisticTab === "profile"
+              : pathname.startsWith("/candidate") || pathname.startsWith("/company") || pathname.startsWith("/admin");
+            const profileHref = currentUser
+              ? currentUser.role === "company"
+                ? "/company/dashboard"
+                : currentUser.role === "admin"
+                ? "/admin"
+                : "/candidate/dashboard"
+              : "/login";
+            return (
+              <Link
+                href={profileHref}
+                prefetch={true}
+                onClick={() => setOptimisticTab("profile")}
+                onPointerDown={() => { try { router.prefetch(profileHref); } catch {} }}
+                onTouchStart={() => { try { router.prefetch(profileHref); } catch {} }}
+                className={`touch-nav-btn flex flex-col items-center justify-center py-1 px-2 min-w-[54px] rounded-xl transition-all duration-75 active:scale-90 active:bg-blue-50/70 select-none cursor-pointer ${
+                  isProfileActive
+                    ? "text-blue-600 font-bold"
+                    : "text-slate-500 hover:text-slate-800 font-medium"
+                }`}
+              >
+                <User className={`w-5 h-5 transition-transform duration-75 ${isProfileActive ? "stroke-[2.2] scale-105" : "stroke-[1.8]"}`} />
+                <span className="text-[11px] mt-1 tracking-tight">Profile</span>
+              </Link>
+            );
+          })()}
         </div>
       </nav>
     )}

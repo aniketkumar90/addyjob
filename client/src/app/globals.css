@@ -37,6 +37,15 @@ body {
   user-select: none;
 }
 
+/* High-performance mobile bottom navigation buttons */
+.touch-nav-btn {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
 /* Utility to hide scrollbars while allowing touch/wheel scrolling */
 .no-scrollbar::-webkit-scrollbar {
   display: none;

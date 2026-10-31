@@ -377,6 +377,14 @@ export default function CandidateDashboardPage() {
     "profile" | "applied" | "saved" | "messages"
   >("profile");
 
+  // Fast prefetch for mobile bottom navigation routes
+  useEffect(() => {
+    try {
+      router.prefetch("/");
+      router.prefetch("/jobs");
+    } catch {}
+  }, [router]);
+
   // Dynamic candidate collections
   const [appliedList, setAppliedList] = useState<AppliedJobItem[]>([]);
   const [savedList, setSavedList] = useState<any[]>([]);
@@ -3891,41 +3899,52 @@ export default function CandidateDashboardPage() {
         </div>
       )}
 
-      {/* Mobile Bottom Navigation for Candidate Dashboard (Matches App Design: Home | Jobs | Saved | Profile) */}
+      {/* Mobile Bottom Navigation for Candidate Dashboard (High-speed, zero-delay touch navigation) */}
       <nav
         aria-label="Mobile Bottom Navigation"
-        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-lg border-t border-slate-200/90 px-3 pt-2 pb-[max(0.6rem,env(safe-area-inset-bottom))] shadow-[0_-4px_25px_rgba(0,0,0,0.06)]"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-lg border-t border-slate-200/90 px-3 pt-2 pb-[max(0.6rem,env(safe-area-inset-bottom))] shadow-[0_-4px_25px_rgba(0,0,0,0.06)] touch-manipulation"
       >
         <div className="flex items-center justify-around max-w-md mx-auto">
           {/* 1. Home */}
           <Link
             href="/"
-            className="flex flex-col items-center justify-center py-1 px-2 min-w-[54px] rounded-xl transition-all text-slate-500 hover:text-slate-800 font-medium"
+            prefetch={true}
+            onPointerDown={() => { try { router.prefetch("/"); } catch {} }}
+            onTouchStart={() => { try { router.prefetch("/"); } catch {} }}
+            className="touch-nav-btn flex flex-col items-center justify-center py-1 px-2 min-w-[54px] rounded-xl transition-all duration-75 active:scale-90 active:bg-blue-50/70 select-none text-slate-500 hover:text-slate-800 font-medium"
           >
-            <Home className="w-5 h-5 stroke-[1.8] transition-transform" />
+            <Home className="w-5 h-5 stroke-[1.8] transition-transform duration-75" />
             <span className="text-[11px] mt-1 tracking-tight">Home</span>
           </Link>
 
           {/* 2. Jobs */}
           <Link
             href="/jobs"
-            className="flex flex-col items-center justify-center py-1 px-2 min-w-[54px] rounded-xl transition-all text-slate-500 hover:text-slate-800 font-medium"
+            prefetch={true}
+            onPointerDown={() => { try { router.prefetch("/jobs"); } catch {} }}
+            onTouchStart={() => { try { router.prefetch("/jobs"); } catch {} }}
+            className="touch-nav-btn flex flex-col items-center justify-center py-1 px-2 min-w-[54px] rounded-xl transition-all duration-75 active:scale-90 active:bg-blue-50/70 select-none text-slate-500 hover:text-slate-800 font-medium"
           >
-            <Briefcase className="w-5 h-5 stroke-[1.8] transition-transform" />
+            <Briefcase className="w-5 h-5 stroke-[1.8] transition-transform duration-75" />
             <span className="text-[11px] mt-1 tracking-tight">Jobs</span>
           </Link>
 
           {/* 3. Saved */}
           <button
             type="button"
-            onClick={() => setActiveSidebarTab("saved")}
-            className={`relative flex flex-col items-center justify-center py-1 px-2 min-w-[54px] rounded-xl transition-all cursor-pointer ${
+            onClick={() => {
+              setActiveSidebarTab("saved");
+              if (typeof window !== "undefined") {
+                window.history.replaceState(null, "", "/candidate/dashboard?tab=saved");
+              }
+            }}
+            className={`touch-nav-btn relative flex flex-col items-center justify-center py-1 px-2 min-w-[54px] rounded-xl transition-all duration-75 active:scale-90 active:bg-blue-50/70 select-none cursor-pointer ${
               activeSidebarTab === "saved"
                 ? "text-blue-600 font-bold"
                 : "text-slate-500 hover:text-slate-800 font-medium"
             }`}
           >
-            <Bookmark className={`w-5 h-5 transition-transform ${activeSidebarTab === "saved" ? "fill-blue-600/20 stroke-[2.2]" : "stroke-[1.8]"}`} />
+            <Bookmark className={`w-5 h-5 transition-transform duration-75 ${activeSidebarTab === "saved" ? "fill-blue-600/20 stroke-[2.2] scale-105" : "stroke-[1.8]"}`} />
             {savedJobsCount > 0 && (
               <span className="absolute top-0 right-2 w-3.5 h-3.5 rounded-full bg-blue-600 text-white text-[8px] font-bold flex items-center justify-center">
                 {savedJobsCount}
@@ -3937,14 +3956,20 @@ export default function CandidateDashboardPage() {
           {/* 4. Profile */}
           <button
             type="button"
-            onClick={() => setActiveSidebarTab("profile")}
-            className={`flex flex-col items-center justify-center py-1 px-2 min-w-[54px] rounded-xl transition-all cursor-pointer ${
+            onClick={() => {
+              setActiveSidebarTab("profile");
+              if (typeof window !== "undefined") {
+                window.history.replaceState(null, "", "/candidate/dashboard");
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }
+            }}
+            className={`touch-nav-btn flex flex-col items-center justify-center py-1 px-2 min-w-[54px] rounded-xl transition-all duration-75 active:scale-90 active:bg-blue-50/70 select-none cursor-pointer ${
               activeSidebarTab === "profile" || activeSidebarTab === "applied"
                 ? "text-blue-600 font-bold"
                 : "text-slate-500 hover:text-slate-800 font-medium"
             }`}
           >
-            <User className={`w-5 h-5 transition-transform ${activeSidebarTab === "profile" || activeSidebarTab === "applied" ? "stroke-[2.2]" : "stroke-[1.8]"}`} />
+            <User className={`w-5 h-5 transition-transform duration-75 ${activeSidebarTab === "profile" || activeSidebarTab === "applied" ? "stroke-[2.2] scale-105" : "stroke-[1.8]"}`} />
             <span className="text-[11px] mt-1 tracking-tight">Profile</span>
           </button>
         </div>
