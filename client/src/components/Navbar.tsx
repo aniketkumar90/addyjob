@@ -76,7 +76,6 @@ export default function Navbar({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
-  const [candidateDotsMenuOpen, setCandidateDotsMenuOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<UserSession | null>(null);
   const [mounted, setMounted] = useState(false);
   const [navSearchQuery, setNavSearchQuery] = useState("");
@@ -85,7 +84,6 @@ export default function Navbar({
 
   const notificationsRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
-  const candidateDotsRef = useRef<HTMLDivElement>(null);
 
   // Close notifications/profile dropdown when clicking outside
   useEffect(() => {
@@ -97,17 +95,14 @@ export default function Navbar({
       if (profileRef.current && !profileRef.current.contains(target)) {
         setProfileOpen(false);
       }
-      if (candidateDotsRef.current && !candidateDotsRef.current.contains(target)) {
-        setCandidateDotsMenuOpen(false);
-      }
     };
-    if (notificationsOpen || profileOpen || candidateDotsMenuOpen) {
+    if (notificationsOpen || profileOpen) {
       document.addEventListener("mousedown", handleClickOutside);
     }
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [notificationsOpen, profileOpen, candidateDotsMenuOpen]);
+  }, [notificationsOpen, profileOpen]);
 
   // Load candidate notifications based on real application events
   const loadNotifications = async () => {
@@ -746,7 +741,7 @@ export default function Navbar({
             )}
           </div>
 
-          {/* Mobile Right: Bell (when logged in) + Hamburger Menu */}
+          {/* Mobile Right: Bell (when logged in) + Universal 3-Lines (Hamburger) Menu */}
           <div className="flex md:hidden items-center gap-1.5 sm:gap-2">
             {mounted && currentUser && (
               <button
@@ -766,150 +761,30 @@ export default function Navbar({
                 )}
               </button>
             )}
-            {/* 3 Dots Menu Button (Appears only on Candidate Profile/Dashboard) */}
-            {pathname === "/candidate/dashboard" ? (
-              <div className="relative" ref={candidateDotsRef}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setCandidateDotsMenuOpen(!candidateDotsMenuOpen);
-                    setNotificationsOpen(false);
-                    setMobileMenuOpen(false);
-                  }}
-                  aria-label="Candidate profile menu (3 dots)"
-                  className="p-2 text-slate-700 hover:text-blue-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
-                >
-                  <MoreVertical className="w-6 h-6 stroke-[2]" />
-                </button>
 
-                {candidateDotsMenuOpen && (
-                  <>
-                    <div
-                      className="fixed inset-0 z-40 bg-black/20 backdrop-blur-2xs"
-                      onClick={() => setCandidateDotsMenuOpen(false)}
-                    />
-                    <div className="absolute top-full right-0 mt-2 z-50 w-56 bg-white rounded-2xl shadow-xl border border-slate-100 p-2 animate-in fade-in zoom-in-95 duration-150 select-none">
-                      {/* User Brief Header */}
-                      <div className="px-3 py-2 border-b border-slate-100 mb-1">
-                        <p className="text-xs font-bold text-slate-900 truncate">
-                          {currentUser?.name || "Candidate"}
-                        </p>
-                        <p className="text-[10px] text-slate-500 truncate">
-                          {currentUser?.email}
-                        </p>
-                      </div>
-
-                      {/* 1. My Profile */}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setCandidateDotsMenuOpen(false);
-                          if (onSelectCandidateTab) {
-                            onSelectCandidateTab("profile");
-                          }
-                        }}
-                        className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${
-                          activeCandidateTab === "profile"
-                            ? "bg-blue-50 text-blue-600 font-bold"
-                            : "text-slate-700 hover:bg-slate-50"
-                        }`}
-                      >
-                        <User className="w-4 h-4 text-blue-600" />
-                        <span>My Profile</span>
-                      </button>
-
-                      {/* 2. Applied Jobs */}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setCandidateDotsMenuOpen(false);
-                          if (onSelectCandidateTab) {
-                            onSelectCandidateTab("applied");
-                          }
-                        }}
-                        className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${
-                          activeCandidateTab === "applied"
-                            ? "bg-blue-50 text-blue-600 font-bold"
-                            : "text-slate-700 hover:bg-slate-50"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <Send className="w-4 h-4 text-slate-500" />
-                          <span>Applied Jobs</span>
-                        </div>
-                        {appliedCount > 0 && (
-                          <span className="px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-bold">
-                            {appliedCount}
-                          </span>
-                        )}
-                      </button>
-
-                      {/* 3. Saved Jobs */}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setCandidateDotsMenuOpen(false);
-                          if (onSelectCandidateTab) {
-                            onSelectCandidateTab("saved");
-                          }
-                        }}
-                        className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${
-                          activeCandidateTab === "saved"
-                            ? "bg-blue-50 text-blue-600 font-bold"
-                            : "text-slate-700 hover:bg-slate-50"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <Bookmark className="w-4 h-4 text-slate-500" />
-                          <span>Saved Jobs</span>
-                        </div>
-                        {savedCount > 0 && (
-                          <span className="px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-bold">
-                            {savedCount}
-                          </span>
-                        )}
-                      </button>
-
-                      {/* Divider */}
-                      <div className="my-1 border-t border-slate-100" />
-
-                      {/* Log Out */}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setCandidateDotsMenuOpen(false);
-                          handleLogout();
-                        }}
-                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50 transition cursor-pointer"
-                      >
-                        <LogOut className="w-4 h-4" />
-                        <span>Log Out</span>
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
-            ) : (
-              <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                aria-label="Toggle navigation menu"
-                className="p-2 text-slate-700 hover:text-blue-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
-              >
-                {mobileMenuOpen ? (
-                  <X className="w-6 h-6 stroke-[2]" />
-                ) : (
-                  <Menu className="w-6 h-6 stroke-[2]" />
-                )}
-              </button>
-            )}
+            {/* Universal 3-Lines Menu Icon */}
+            <button
+              onClick={() => {
+                setMobileMenuOpen(!mobileMenuOpen);
+                setNotificationsOpen(false);
+              }}
+              aria-label="Toggle navigation menu (3 lines)"
+              className="p-2 text-slate-700 hover:text-blue-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+            >
+              {mobileMenuOpen ? (
+                <X className="w-6 h-6 stroke-[2]" />
+              ) : (
+                <Menu className="w-6 h-6 stroke-[2]" />
+              )}
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Mobile Navigation Drawer */}
+      {/* Mobile Navigation Drawer (Combines Image 1 & Image 2 elements, excludes Home & Jobs since they are in bottom bar) */}
       {mobileMenuOpen && (
         <div className="md:hidden bg-white border-b border-slate-200 px-4 pt-3 pb-6 space-y-3 shadow-lg animate-in slide-in-from-top-2 duration-200">
-          {/* Mobile Search Bar */}
+          {/* Mobile Search Bar (Image 1) */}
           <form
             onSubmit={(e) => {
               handleNavSearch(e);
@@ -927,27 +802,117 @@ export default function Navbar({
             />
           </form>
 
+          {/* Candidate-specific Items (From Image 2: My Profile, Applied Jobs, Saved Jobs) */}
+          {mounted && currentUser && currentUser.role === "job_seeker" && (
+            <div className="space-y-1 pb-2 border-b border-slate-100">
+              <p className="px-3 pt-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                Candidate Management
+              </p>
+              {/* My Profile */}
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  if (onSelectCandidateTab) {
+                    onSelectCandidateTab("profile");
+                  } else {
+                    router.push("/candidate/dashboard");
+                  }
+                }}
+                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${
+                  activeCandidateTab === "profile" && pathname === "/candidate/dashboard"
+                    ? "bg-blue-50 text-blue-600 font-bold"
+                    : "text-slate-700 hover:bg-slate-50"
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <User className="w-4 h-4 text-blue-600" />
+                  <span>My Profile</span>
+                </div>
+              </button>
+
+              {/* Applied Jobs */}
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  if (onSelectCandidateTab) {
+                    onSelectCandidateTab("applied");
+                  } else {
+                    router.push("/candidate/dashboard?tab=applied");
+                  }
+                }}
+                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${
+                  activeCandidateTab === "applied" && pathname === "/candidate/dashboard"
+                    ? "bg-blue-50 text-blue-600 font-bold"
+                    : "text-slate-700 hover:bg-slate-50"
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <Send className="w-4 h-4 text-slate-500" />
+                  <span>Applied Jobs</span>
+                </div>
+                {appliedCount > 0 && (
+                  <span className="px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-bold">
+                    {appliedCount}
+                  </span>
+                )}
+              </button>
+
+              {/* Saved Jobs */}
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  if (onSelectCandidateTab) {
+                    onSelectCandidateTab("saved");
+                  } else {
+                    router.push("/candidate/dashboard?tab=saved");
+                  }
+                }}
+                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${
+                  activeCandidateTab === "saved" && pathname === "/candidate/dashboard"
+                    ? "bg-blue-50 text-blue-600 font-bold"
+                    : "text-slate-700 hover:bg-slate-50"
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <Bookmark className="w-4 h-4 text-slate-500" />
+                  <span>Saved Jobs</span>
+                </div>
+                {savedCount > 0 && (
+                  <span className="px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-bold">
+                    {savedCount}
+                  </span>
+                )}
+              </button>
+            </div>
+          )}
+
+          {/* General navigation links (From Image 1: Companies, Resources, About - Home & Jobs removed) */}
           <div className="flex flex-col space-y-1">
-            {navLinks.map((link) => {
-              const isActive = getIsActive(link.href, link.name);
-              return (
-                <Link
-                  key={link.name}
-                  href={link.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                    isActive
-                      ? "bg-blue-50 text-blue-600 font-semibold"
-                      : "text-slate-700 hover:bg-slate-50"
-                  }`}
-                >
-                  <span>{link.name}</span>
-                  {isActive && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-blue-600" />
-                  )}
-                </Link>
-              );
-            })}
+            {navLinks
+              .filter((link) => link.name !== "Home" && link.name !== "Jobs")
+              .map((link) => {
+                const isActive = getIsActive(link.href, link.name);
+                return (
+                  <Link
+                    key={link.name}
+                    href={link.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                      isActive
+                        ? "bg-blue-50 text-blue-600 font-semibold"
+                        : "text-slate-700 hover:bg-slate-50"
+                    }`}
+                  >
+                    <span>{link.name}</span>
+                    {isActive && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-blue-600" />
+                    )}
+                  </Link>
+                );
+              })}
           </div>
 
           {mounted && currentUser ? (
