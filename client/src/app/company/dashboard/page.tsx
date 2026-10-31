@@ -4684,7 +4684,7 @@ export default function CompanyDashboardPage() {
                         <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                           <th className="py-3.5 px-4">Candidate</th>
                           <th className="py-3.5 px-4">Role / Title</th>
-                          <th className="py-3.5 px-4">Experience & Location</th>
+                          <th className="py-3.5 px-4">Experience</th>
                           <th className="py-3.5 px-4">Skills</th>
                           <th className="py-3.5 px-4">Contact Details</th>
                           <th className="py-3.5 px-4">Purchased On</th>
@@ -4729,18 +4729,12 @@ export default function CompanyDashboardPage() {
                                 </span>
                               </td>
 
-                              {/* 3. Experience & Location */}
+                              {/* 3. Experience */}
                               <td className="py-3.5 px-4 whitespace-nowrap">
-                                <div className="flex items-center gap-1.5">
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-slate-100 text-slate-700">
-                                    <Briefcase className="w-3 h-3 text-slate-400" />
-                                    {res.experience || "Fresher"}
-                                  </span>
-                                  <span className="text-[11px] text-slate-500 flex items-center gap-0.5">
-                                    <MapPin className="w-3 h-3 text-slate-400" />
-                                    {res.location || "India"}
-                                  </span>
-                                </div>
+                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold bg-slate-100 text-slate-700">
+                                  <Briefcase className="w-3 h-3 text-slate-400" />
+                                  {res.experience || "Fresher"}
+                                </span>
                               </td>
 
                               {/* 4. Skills (Tag Badges) */}
@@ -4889,15 +4883,11 @@ export default function CompanyDashboardPage() {
                             </span>
                           </div>
 
-                          {/* Experience, Location & Purchased Date */}
+                          {/* Experience & Purchased Date */}
                           <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-slate-600">
                             <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-medium">
                               <Briefcase className="w-3 h-3 text-slate-400 shrink-0" />
                               <span>{res.experience || "Fresher"}</span>
-                            </span>
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-medium">
-                              <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
-                              <span>{res.location || "India"}</span>
                             </span>
                             <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-50 text-slate-500 font-medium border border-slate-100">
                               <Calendar className="w-3 h-3 text-slate-400 shrink-0" />
