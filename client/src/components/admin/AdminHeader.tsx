@@ -13,7 +13,7 @@ import {
   LogOut,
   Building2,
   UserCheck,
-  MoreVertical,
+  X,
   CheckCheck,
 } from "lucide-react";
 import {
@@ -64,6 +64,7 @@ export default function AdminHeader({
 }: AdminHeaderProps) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [notifications, setNotifications] = useState<AdminNotificationItem[]>([]);
   const [readIds, setReadIds] = useState<string[]>([]);
 
@@ -176,42 +177,48 @@ export default function AdminHeader({
   const unreadCount = notifications.filter((n) => !readIds.includes(n.id)).length;
 
   return (
-    <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/80 px-3 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-2 sm:gap-4">
-      {/* Left: Mobile Sidebar Toggle & Global Search */}
-      <div className="flex items-center gap-2 sm:gap-4 flex-1 max-w-2xl min-w-0">
-        <button
-          onClick={onToggleSidebar}
-          aria-label="Toggle navigation sidebar"
-          title="Open Menu"
-          className="lg:hidden p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer shrink-0"
-        >
-          <Menu className="w-5 h-5" />
-        </button>
+    <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/80">
+      <div className="px-3 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-2 sm:gap-4">
+        {/* Left: Mobile Sidebar Toggle & Global Search */}
+        <div className="flex items-center gap-2 sm:gap-4 flex-1 max-w-2xl min-w-0">
+          <button
+            onClick={onToggleSidebar}
+            aria-label="Toggle navigation sidebar"
+            title="Open Menu"
+            className="lg:hidden p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer shrink-0"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
 
-        {/* Global Search Bar */}
-        <div className="relative w-full max-w-xs sm:max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search..."
-            className="w-full pl-9 pr-3 py-1.5 sm:py-2 bg-slate-50 hover:bg-slate-100/80 focus:bg-white text-xs sm:text-sm text-slate-800 placeholder-slate-400 rounded-xl border border-slate-200/80 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all"
-          />
+          {/* Global Search Bar (Desktop / Tablet view) */}
+          <div className="hidden sm:block relative w-full max-w-xs sm:max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search..."
+              className="w-full pl-9 pr-3 py-1.5 sm:py-2 bg-slate-50 hover:bg-slate-100/80 focus:bg-white text-xs sm:text-sm text-slate-800 placeholder-slate-400 rounded-xl border border-slate-200/80 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all"
+            />
+          </div>
         </div>
-      </div>
 
-      {/* Right: 3-Dots Sidebar Toggle, Notification & Profile */}
-      <div className="flex items-center gap-1.5 sm:gap-4 relative shrink-0">
-        {/* Mobile 3-Dots Toggle Button for Quick Sidebar Open */}
-        <button
-          onClick={onToggleSidebar}
-          aria-label="Open sidebar menu (3 dots)"
-          title="Open sidebar menu"
-          className="lg:hidden p-2 text-slate-600 hover:text-blue-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
-        >
-          <MoreVertical className="w-5 h-5" />
-        </button>
+        {/* Right: Mobile Search Toggle Button, Notification & Profile */}
+        <div className="flex items-center gap-1.5 sm:gap-4 relative shrink-0">
+          {/* Mobile Search Toggle Button */}
+          <button
+            type="button"
+            onClick={() => setIsMobileSearchOpen((prev) => !prev)}
+            aria-label="Toggle search bar"
+            title="Search"
+            className={`sm:hidden p-2 rounded-xl border transition cursor-pointer flex items-center justify-center ${
+              isMobileSearchOpen || searchQuery
+                ? "bg-blue-50 text-blue-600 border-blue-200"
+                : "text-slate-600 hover:text-blue-600 hover:bg-blue-50 border-slate-200"
+            }`}
+          >
+            <Search className="w-4 h-4" />
+          </button>
 
         {/* Notifications Dropdown */}
         <div ref={notificationRef} className="relative">
@@ -232,7 +239,7 @@ export default function AdminHeader({
           </button>
 
           {showNotifications && (
-            <div className="absolute right-0 mt-2 w-80 sm:w-92 bg-white rounded-2xl shadow-xl border border-slate-100 py-3 z-50 animate-in fade-in zoom-in-95 duration-150">
+            <div className="fixed inset-x-3 top-16 max-w-sm mx-auto sm:max-w-none sm:mx-0 sm:inset-x-auto sm:absolute sm:right-0 sm:top-full sm:mt-2 sm:w-92 bg-white rounded-2xl shadow-2xl sm:shadow-xl border border-slate-200/80 sm:border-slate-100 py-3 z-50 animate-in fade-in zoom-in-95 duration-150">
               <div className="px-4 py-2 border-b border-slate-100 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <h4 className="text-sm font-bold text-slate-900">Notifications</h4>
@@ -383,6 +390,43 @@ export default function AdminHeader({
           )}
         </div>
       </div>
+    </div>
+
+      {/* Mobile Search Bar Dropdown (Opens right below the navbar) */}
+      {isMobileSearchOpen && (
+        <div className="sm:hidden px-3.5 pb-3 pt-1 border-t border-slate-100 bg-white/95 animate-in fade-in slide-in-from-top-1 duration-150">
+          <div className="relative w-full flex items-center gap-2">
+            <div className="relative flex-1">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <input
+                type="text"
+                autoFocus
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search companies, jobs, resumes..."
+                className="w-full pl-9 pr-8 py-2 bg-slate-50 focus:bg-white text-xs text-slate-800 placeholder-slate-400 rounded-xl border border-slate-200 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 rounded-md cursor-pointer"
+                  title="Clear search"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsMobileSearchOpen(false)}
+              className="px-2.5 py-1.5 text-xs font-bold text-slate-500 hover:text-slate-800 rounded-lg hover:bg-slate-100 transition cursor-pointer shrink-0"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

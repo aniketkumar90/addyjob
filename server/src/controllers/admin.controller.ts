@@ -822,16 +822,24 @@ export const getJobApplicants = async (req: Request, res: Response) => {
       }
     }
 
-    const apps = await Application.find(orConditions.length > 0 ? { $or: orConditions } : { jobId: id }).sort({ createdAt: -1 });
+    const apps = await Application.find(orConditions.length > 0 ? { $or: orConditions } : { jobId: id })
+      .select('-pdfData')
+      .sort({ createdAt: -1 })
+      .lean();
 
-    // Fetch user details for candidate enrichment if registered user
+    // Fetch user details for candidate enrichment if registered user (lean & exclude heavy buffers)
     const emails = apps.map((a: any) => a.candidateEmail).filter(Boolean);
-    const users = await User.find({ email: { $in: emails }, role: 'job_seeker' });
-    const userMap = new Map(users.map((u) => [u.email.toLowerCase().trim(), u]));
+    const users = await User.find({ email: { $in: emails }, role: 'job_seeker' })
+      .select('name email phone headline targetRole specialization experience skills resumeUrl resumeName education highestQualification course university passingYear bio languages location preferredLocation')
+      .lean();
+    const userMap = new Map(users.map((u: any) => [u.email.toLowerCase().trim(), u]));
 
     const formatted = apps.map((a: any) => {
       const u = a.candidateEmail ? userMap.get(a.candidateEmail.toLowerCase().trim()) : null;
       const cName = a.candidateName || (u ? u.name : 'Candidate');
+      const isHttp = typeof (a.resumeUrl || (u ? u.resumeUrl : '')) === 'string' &&
+        ((a.resumeUrl || (u ? u.resumeUrl : '')).startsWith('http://') || (a.resumeUrl || (u ? u.resumeUrl : '')).startsWith('https://'));
+      const hasPdf = Boolean(a.resumeUrl || a.fileName || (u && (u.resumeUrl || u.resumeName)));
       return {
         id: a._id.toString(),
         candidateName: cName,
@@ -847,12 +855,13 @@ export const getJobApplicants = async (req: Request, res: Response) => {
         resumeViewedAt: a.resumeViewedAt,
         recruiterAction: a.recruiterAction || '',
         recruiterActionAt: a.recruiterActionAt,
-        resumeUrl: a.resumeUrl || (u ? u.resumeUrl : '') || '',
+        resumeUrl: isHttp ? (a.resumeUrl || (u ? u.resumeUrl : '')) : '',
         domain: a.domain || (u ? u.specialization || u.targetRole : '') || '',
         experience: a.experience || (u ? u.experience : '') || '',
         skills: (a.skills && a.skills.length > 0) ? a.skills : (u && u.skills ? u.skills : (job && job.skills ? job.skills : [])),
-        pdfData: a.pdfData || a.resumeUrl || (u ? u.resumeUrl : '') || '',
-        fileName: a.fileName || (u ? u.resumeName : '') || '',
+        pdfData: isHttp ? (a.resumeUrl || (u ? u.resumeUrl : '')) : '',
+        fileName: a.fileName || (u ? u.resumeName : '') || 'Application_Resume.pdf',
+        hasPdf,
         jobId: a.jobId ? a.jobId.toString() : (job ? job._id.toString() : id),
         education: (u ? (u.education || u.highestQualification || u.course) : '') || '',
         university: (u ? u.university : '') || '',

@@ -656,7 +656,8 @@ export default function JobSeekersManager({
 
       {/* Candidates Data Table */}
       <div className="bg-white rounded-3xl border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.03)] overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* DESKTOP TABLE VIEW: Visible on md+ screens */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">
@@ -864,6 +865,148 @@ export default function JobSeekersManager({
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* MOBILE CARDS VIEW: 100% width, ZERO horizontal scrolling (Hidden on Desktop) */}
+        <div className="md:hidden divide-y divide-slate-100">
+          {filteredCandidates.length === 0 ? (
+            <div className="py-12 px-4 text-center">
+              <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto mb-3">
+                <Users className="w-6 h-6" />
+              </div>
+              <p className="font-bold text-slate-700 text-sm">
+                No candidates match your filters
+              </p>
+              <p className="text-xs text-slate-400 mt-1 max-w-xs mx-auto">
+                {hasActiveFilters || filter !== "ALL"
+                  ? "Try clearing some search terms or adjusting the role, experience, or skill filters."
+                  : "When candidates sign up on the platform, their details will appear here automatically."}
+              </p>
+              {(hasActiveFilters || filter !== "ALL") && (
+                <button
+                  type="button"
+                  onClick={resetAllFilters}
+                  className="mt-3.5 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-100 font-bold text-xs transition cursor-pointer"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>Clear All Filters</span>
+                </button>
+              )}
+            </div>
+          ) : (
+            filteredCandidates.map((c) => (
+              <div
+                key={`mob-cand-${c.id}`}
+                className="p-4 space-y-3 bg-white"
+              >
+                {/* Header: Avatar + Candidate Name & ID + Reg Date */}
+                <div className="flex items-start justify-between gap-2.5">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div
+                      className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-white text-xs shrink-0 shadow-xs ${
+                        c.avatarBg || "bg-blue-600"
+                      }`}
+                    >
+                      {c.avatarLetter || "CD"}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <h4 className="font-bold text-slate-900 text-sm leading-tight truncate">
+                          {c.name}
+                        </h4>
+                        {c.userId && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 font-mono font-bold shrink-0">
+                            {c.userId}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-slate-500 font-medium truncate mt-0.5">
+                        {c.headline || c.targetRole || "Job Seeker"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <span className="shrink-0 inline-flex items-center gap-1 text-[10px] font-medium text-slate-400 bg-slate-50 px-2 py-0.5 rounded-md border border-slate-100">
+                    <Calendar className="w-3 h-3 text-slate-400" />
+                    <span>{c.registeredOn || "Recent"}</span>
+                  </span>
+                </div>
+
+                {/* Contact: Email & Phone */}
+                <div className="text-[11px] text-slate-600 space-y-1 bg-slate-50/80 p-2.5 rounded-xl border border-slate-100">
+                  <div className="flex items-center gap-1.5 truncate">
+                    <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                    <span className="truncate">{c.email}</span>
+                  </div>
+                  {c.phone && (
+                    <div className="flex items-center gap-1.5">
+                      <Phone className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                      <span>{c.phone}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Details Badges: Experience, Location, Skills */}
+                <div className="flex items-center gap-1.5 flex-wrap text-xs">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-slate-100 text-slate-700">
+                    <Briefcase className="w-3 h-3 text-slate-500 shrink-0" />
+                    <span>{c.experience || "Fresher"}</span>
+                  </span>
+
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-medium bg-slate-100 text-slate-600">
+                    <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
+                    <span>{c.location || "India"}</span>
+                  </span>
+
+                  {c.skills && c.skills.length > 0 ? (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 text-[11px] font-bold border border-blue-200">
+                      <Award className="w-3 h-3 text-blue-600 shrink-0" />
+                      <span>{c.skills.length} Skills</span>
+                    </span>
+                  ) : (
+                    <span className="text-[11px] text-slate-400">0 Skills</span>
+                  )}
+                </div>
+
+                {/* Action Buttons: View Profile, Download CV, Delete */}
+                <div className="flex items-center gap-2 pt-1 border-t border-slate-100">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedCandidate(c)}
+                    className="flex-1 py-2 px-2.5 text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 active:scale-[0.98] rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs"
+                  >
+                    <Eye className="w-3.5 h-3.5" />
+                    <span>View Profile</span>
+                  </button>
+
+                  {c.resumeName || c.resumeUrl ? (
+                    <button
+                      type="button"
+                      onClick={() => downloadCandidateResume(c)}
+                      className="py-2 px-3 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 active:scale-[0.98] rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs"
+                      title="Download Resume PDF"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span>Resume</span>
+                    </button>
+                  ) : null}
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (confirm(`Are you sure you want to remove candidate "${c.name}"?`)) {
+                        onDeleteJobSeeker(c.id, c.name);
+                      }
+                    }}
+                    className="w-9 h-9 rounded-xl hover:bg-rose-50 text-slate-400 hover:text-rose-600 flex items-center justify-center transition cursor-pointer shrink-0 border border-slate-200/60"
+                    title="Delete candidate"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
 

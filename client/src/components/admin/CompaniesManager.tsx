@@ -375,7 +375,8 @@ export default function CompaniesManager({
 
       {/* Companies List Table */}
       <div className="bg-white rounded-2xl border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.03)] overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* DESKTOP TABLE VIEW: Visible on md+ screens */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50/70 border-b border-slate-200 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
@@ -540,6 +541,184 @@ export default function CompaniesManager({
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* MOBILE CARDS VIEW: 100% width, ZERO horizontal scrolling (Hidden on Desktop) */}
+        <div className="md:hidden divide-y divide-slate-100">
+          {filteredCompanies.length === 0 ? (
+            <div className="py-12 px-4 text-center text-slate-400">
+              <Building2 className="w-10 h-10 mx-auto text-slate-300 mb-2" />
+              <p className="font-bold text-slate-700 text-sm">No companies found</p>
+              <p className="text-xs text-slate-400 mt-1">
+                No companies match your search or filter criteria.
+              </p>
+            </div>
+          ) : (
+            filteredCompanies.map((c) => (
+              <div key={`mob-comp-${c.id}`} className="p-4 space-y-3 bg-white">
+                {/* Header: Logo + Company Name & Code + Status */}
+                <div className="flex items-start justify-between gap-2.5">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    {c.logo || c.profileImage ? (
+                      <img
+                        src={c.logo || c.profileImage}
+                        alt={c.name}
+                        className="w-10 h-10 rounded-xl object-cover shrink-0 border border-slate-200"
+                      />
+                    ) : (
+                      <div
+                        className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xs text-white shrink-0 shadow-xs ${c.logoBg}`}
+                      >
+                        {c.logoLetter}
+                      </div>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <h4 className="font-bold text-slate-900 text-sm leading-tight truncate">
+                          {c.name}
+                        </h4>
+                        {c.userId && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 font-mono shrink-0">
+                            {c.userId}
+                          </span>
+                        )}
+                      </div>
+                      {c.email && (
+                        <p className="text-xs text-slate-500 flex items-center gap-1 truncate mt-0.5">
+                          <Mail className="w-3 h-3 text-slate-400 shrink-0" />
+                          <span className="truncate">{c.email}</span>
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <span
+                    className={`shrink-0 inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                      c.status === "Approved"
+                        ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                        : c.status === "Pending"
+                        ? "bg-amber-50 text-amber-700 border-amber-200"
+                        : "bg-rose-50 text-rose-700 border-rose-200"
+                    }`}
+                  >
+                    {c.status}
+                  </span>
+                </div>
+
+                {/* Details Badges: Location & Plan */}
+                <div className="flex items-center gap-2 flex-wrap text-xs">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 text-[11px] font-medium">
+                    <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                    <span>{c.location || "Location not specified"}</span>
+                  </span>
+
+                  <span
+                    className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold border ${
+                      (c.plan || "").toLowerCase().includes("enterprise") || (c.plan || "").toLowerCase().includes("scale")
+                        ? "bg-purple-50 text-purple-700 border-purple-200"
+                        : (c.plan || "").toLowerCase().includes("pro")
+                        ? "bg-blue-50 text-blue-700 border-blue-200"
+                        : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                    }`}
+                  >
+                    {c.plan || "Basic Plan"}
+                  </span>
+                </div>
+
+                {/* Action Buttons (All 3 in ONE LINE for Approved / Rejected) */}
+                {c.status !== "Pending" ? (
+                  <div className="grid grid-cols-3 gap-1.5 pt-1 border-t border-slate-100">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedCompany(c)}
+                      className="w-full py-2 px-1 text-[10.5px] font-bold text-[#7C3AED] bg-[#EDE9FE] hover:bg-[#DDD6FE] active:scale-[0.98] rounded-xl transition cursor-pointer flex items-center justify-center gap-1 shadow-2xs whitespace-nowrap"
+                      title="View Company Details"
+                    >
+                      <Eye className="w-3.5 h-3.5 shrink-0" />
+                      <span>View Details</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setPermissionsModalCompany(c)}
+                      className="w-full py-2 px-1 text-[10.5px] font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 active:scale-[0.98] rounded-xl transition cursor-pointer flex items-center justify-center gap-1 shadow-2xs whitespace-nowrap"
+                      title="Manage Company Permissions"
+                    >
+                      <KeyRound className="w-3.5 h-3.5 shrink-0" />
+                      <span>Permissions</span>
+                    </button>
+
+                    {c.status === "Approved" ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setRejectionModalCompany(c);
+                          setRejectionReasonText(c.rejectionReason || "");
+                        }}
+                        className="w-full py-2 px-1 text-[10.5px] font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 active:scale-[0.98] rounded-xl transition cursor-pointer flex items-center justify-center gap-1 shadow-2xs whitespace-nowrap"
+                        title="Revoke Company Access"
+                      >
+                        <X className="w-3.5 h-3.5 stroke-[2.5] shrink-0" />
+                        <span>Revoke Access</span>
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => onApprove(c.id, c.name)}
+                        className="w-full py-2 px-1 text-[10.5px] font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 active:scale-[0.98] rounded-xl transition cursor-pointer flex items-center justify-center gap-1 shadow-2xs whitespace-nowrap"
+                        title="Re-approve Company"
+                      >
+                        <Check className="w-3.5 h-3.5 stroke-[2.5] shrink-0" />
+                        <span>Re-approve</span>
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <div className="space-y-2 pt-1 border-t border-slate-100">
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedCompany(c)}
+                        className="w-full py-2 px-2 text-xs font-bold text-[#7C3AED] bg-[#EDE9FE] hover:bg-[#DDD6FE] active:scale-[0.98] rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                        <span>View Details</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPermissionsModalCompany(c)}
+                        className="w-full py-2 px-2 text-xs font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 active:scale-[0.98] rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs"
+                      >
+                        <KeyRound className="w-3.5 h-3.5" />
+                        <span>Permissions</span>
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => onApprove(c.id, c.name)}
+                        className="w-full py-2 px-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] rounded-xl shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer"
+                      >
+                        <Check className="w-3.5 h-3.5 stroke-[3]" />
+                        <span>Approve</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setRejectionModalCompany(c);
+                          setRejectionReasonText(c.rejectionReason || "");
+                        }}
+                        className="w-full py-2 px-2 text-xs font-bold text-rose-600 hover:bg-rose-50 border border-rose-200 active:scale-[0.98] rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer"
+                      >
+                        <X className="w-3.5 h-3.5 stroke-[3]" />
+                        <span>Reject</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))
+          )}
         </div>
       </div>
 

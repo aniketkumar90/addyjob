@@ -335,23 +335,25 @@ export default function BulkSendResumesModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-900/60 backdrop-blur-sm animate-fade-in overflow-y-auto">
-      <div className="relative w-full max-w-3xl bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden my-4 max-h-[92vh] flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-5 bg-slate-900/60 backdrop-blur-sm animate-fade-in overflow-hidden">
+      <div className="relative w-full max-w-3xl bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-100 overflow-hidden max-h-[92dvh] sm:max-h-[90vh] flex flex-col">
         {/* MODAL HEADER */}
-        <div className="flex items-center justify-between px-6 py-4.5 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-md">
-              <Send className="w-5 h-5" />
+        <div className="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white shrink-0">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-md shrink-0">
+              <Send className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <div>
-              <h3 className="text-base sm:text-lg font-black text-white tracking-tight flex items-center gap-2">
-                <span>Send Resumes to Company</span>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-200 border border-blue-400/30">
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                <h3 className="text-sm sm:text-base font-black text-white tracking-tight truncate">
+                  Send Resumes to Company
+                </h3>
+                <span className="text-[9px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-200 border border-blue-400/30 shrink-0">
                   Step {step} of 3
                 </span>
-              </h3>
-              <p className="text-xs text-slate-300 mt-0.5">
-                Deliver filtered candidate resumes directly into company's Purchased Resumes vault.
+              </div>
+              <p className="text-[11px] sm:text-xs text-slate-300 mt-0.5 truncate hidden xs:block sm:block">
+                Deliver filtered candidate resumes directly into company vault.
               </p>
             </div>
           </div>
@@ -359,27 +361,27 @@ export default function BulkSendResumesModal({
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition cursor-pointer"
+            className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition cursor-pointer shrink-0 ml-2"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* STEP PROGRESS WIZARD BAR */}
-        <div className="px-6 py-2.5 bg-slate-50 border-b border-slate-200/80 flex items-center justify-between text-xs shrink-0">
-          <div className="flex items-center gap-2 sm:gap-4 overflow-x-auto">
+        <div className="px-3.5 py-2 sm:px-6 sm:py-2.5 bg-slate-50 border-b border-slate-200/80 flex items-center justify-between text-xs shrink-0">
+          <div className="flex items-center justify-between w-full sm:w-auto sm:justify-start gap-1 sm:gap-4">
             <button
               type="button"
               onClick={() => {
                 setErrorMessage("");
                 setStep(1);
               }}
-              className={`flex items-center gap-1.5 font-bold transition-all cursor-pointer ${
+              className={`flex items-center gap-1 sm:gap-1.5 font-bold transition-all cursor-pointer ${
                 step === 1 ? "text-blue-600" : step > 1 ? "text-emerald-600 hover:text-emerald-700" : "text-slate-400"
               }`}
             >
               <span
-                className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${
+                className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${
                   step === 1
                     ? "bg-blue-600 text-white"
                     : step > 1
@@ -389,7 +391,8 @@ export default function BulkSendResumesModal({
               >
                 {step > 1 ? "✓" : "1"}
               </span>
-              <span>1. Quantity & Range</span>
+              <span className="hidden sm:inline">1. Quantity & Range</span>
+              <span className="sm:hidden text-[11px]">Quantity</span>
             </button>
 
             <ChevronRight className="w-3.5 h-3.5 text-slate-300 shrink-0" />
@@ -403,14 +406,14 @@ export default function BulkSendResumesModal({
                   setStep(2);
                 }
               }}
-              className={`flex items-center gap-1.5 font-bold transition-all ${
+              className={`flex items-center gap-1 sm:gap-1.5 font-bold transition-all ${
                 selectedIds.size > 0 ? "cursor-pointer" : "cursor-not-allowed opacity-60"
               } ${
                 step === 2 ? "text-blue-600" : step > 2 ? "text-emerald-600 hover:text-emerald-700" : "text-slate-400"
               }`}
             >
               <span
-                className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${
+                className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${
                   step === 2
                     ? "bg-blue-600 text-white"
                     : step > 2
@@ -420,7 +423,8 @@ export default function BulkSendResumesModal({
               >
                 {step > 2 ? "✓" : "2"}
               </span>
-              <span>2. Choose Company</span>
+              <span className="hidden sm:inline">2. Choose Company</span>
+              <span className="sm:hidden text-[11px]">Company</span>
             </button>
 
             <ChevronRight className="w-3.5 h-3.5 text-slate-300 shrink-0" />
@@ -434,20 +438,21 @@ export default function BulkSendResumesModal({
                   setStep(3);
                 }
               }}
-              className={`flex items-center gap-1.5 font-bold transition-all ${
+              className={`flex items-center gap-1 sm:gap-1.5 font-bold transition-all ${
                 selectedIds.size > 0 && selectedCompany ? "cursor-pointer" : "cursor-not-allowed opacity-60"
               } ${
                 step === 3 ? "text-blue-600" : "text-slate-400"
               }`}
             >
               <span
-                className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${
+                className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${
                   step === 3 ? "bg-blue-600 text-white" : "bg-slate-200 text-slate-500"
                 }`}
               >
                 3
               </span>
-              <span>3. Review & Confirm</span>
+              <span className="hidden sm:inline">3. Review & Confirm</span>
+              <span className="sm:hidden text-[11px]">Confirm</span>
             </button>
           </div>
 
@@ -457,7 +462,7 @@ export default function BulkSendResumesModal({
         </div>
 
         {/* MODAL BODY */}
-        <div className="p-6 overflow-y-auto space-y-5 flex-1 text-slate-700 text-xs">
+        <div className="p-3.5 sm:p-6 overflow-y-auto min-h-0 flex-1 space-y-3.5 sm:space-y-5 text-slate-700 text-xs">
           {/* SUCCESS SCREEN */}
           {isSuccess && sentResult ? (
             <div className="py-8 px-4 text-center space-y-4">
@@ -1090,12 +1095,12 @@ export default function BulkSendResumesModal({
 
         {/* MODAL FOOTER */}
         {!isSuccess && (
-          <div className="flex items-center justify-between px-6 py-4 bg-slate-50 border-t border-slate-200/80 shrink-0">
+          <div className="flex items-center justify-between px-3.5 py-3 sm:px-6 sm:py-4 bg-slate-50 border-t border-slate-200/80 shrink-0 gap-2">
             {step === 1 ? (
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-white transition cursor-pointer"
+                className="px-3.5 py-2 sm:px-4 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-white transition cursor-pointer"
               >
                 Cancel
               </button>
@@ -1103,7 +1108,7 @@ export default function BulkSendResumesModal({
               <button
                 type="button"
                 onClick={() => setStep((prev) => (prev > 1 ? ((prev - 1) as any) : 1))}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-white transition cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 sm:px-4 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-white transition cursor-pointer"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
                 <span>Back</span>
@@ -1123,14 +1128,15 @@ export default function BulkSendResumesModal({
                     setErrorMessage("");
                     setStep(2);
                   }}
-                  className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition shadow-xs cursor-pointer ${
+                  className={`inline-flex items-center gap-1.5 sm:gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs font-bold transition shadow-xs cursor-pointer ${
                     selectedIds.size > 0
                       ? "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20"
                       : "bg-slate-200 text-slate-400 cursor-not-allowed"
                   }`}
                 >
-                  <span>Next: Choose Company ({selectedIds.size})</span>
-                  <ChevronRight className="w-4 h-4" />
+                  <span className="hidden sm:inline">Next: Choose Company ({selectedIds.size})</span>
+                  <span className="sm:hidden">Next: Choose Company ({selectedIds.size})</span>
+                  <ChevronRight className="w-4 h-4 shrink-0" />
                 </button>
               )}
 
@@ -1146,14 +1152,15 @@ export default function BulkSendResumesModal({
                     setErrorMessage("");
                     setStep(3);
                   }}
-                  className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition shadow-xs cursor-pointer ${
+                  className={`inline-flex items-center gap-1.5 sm:gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs font-bold transition shadow-xs cursor-pointer ${
                     selectedCompany
                       ? "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20"
                       : "bg-slate-200 text-slate-400 cursor-not-allowed"
                   }`}
                 >
-                  <span>Next: Review & Confirm</span>
-                  <ChevronRight className="w-4 h-4" />
+                  <span className="hidden sm:inline">Next: Review & Confirm</span>
+                  <span className="sm:hidden">Next: Review</span>
+                  <ChevronRight className="w-4 h-4 shrink-0" />
                 </button>
               )}
 
@@ -1162,18 +1169,21 @@ export default function BulkSendResumesModal({
                   type="button"
                   disabled={isSubmitting || selectedCandidatesList.length === 0}
                   onClick={handleConfirmSend}
-                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-700 hover:to-indigo-800 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-500/25 transition-all hover:scale-[1.02] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="inline-flex items-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-700 hover:to-indigo-800 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-500/25 transition-all hover:scale-[1.02] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isSubmitting ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Delivering Resumes...</span>
+                      <span>Sending...</span>
                     </>
                   ) : (
                     <>
                       <Send className="w-4 h-4" />
-                      <span>
+                      <span className="hidden sm:inline">
                         Confirm & Send {selectedCandidatesList.length} Resumes to {selectedCompany?.name}
+                      </span>
+                      <span className="sm:hidden">
+                        Send {selectedCandidatesList.length} Resumes
                       </span>
                     </>
                   )}

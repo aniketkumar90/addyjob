@@ -96,7 +96,6 @@ export default function JobsModerator({
   const handleOpenApplicants = async (job: JobPosting) => {
     setSelectedApplicantsJob(job);
     setIsApplicantsModalOpen(true);
-    setIsLoadingApplicants(true);
 
     // Initial match from preloaded applications
     const initialMatched = (applications || []).filter(
@@ -106,6 +105,8 @@ export default function JobsModerator({
           app.company?.toLowerCase().trim() === job.company?.toLowerCase().trim())
     );
     setJobApplicants(initialMatched);
+    // If we have cached/preloaded items, don't show full blocking loader
+    setIsLoadingApplicants(initialMatched.length === 0);
 
     try {
       const liveApplicants = await fetchJobApplicants(job.id);
@@ -206,7 +207,8 @@ export default function JobsModerator({
 
       {/* Jobs Grid / Table */}
       <div className="bg-white rounded-2xl border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.03)]">
-        <div className="overflow-x-auto min-h-[320px]">
+        {/* DESKTOP TABLE VIEW: Visible on md+ screens */}
+        <div className="hidden md:block overflow-x-auto min-h-[320px]">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50/70 border-b border-slate-200 text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">
@@ -445,6 +447,167 @@ export default function JobsModerator({
             )}
             </tbody>
           </table>
+        </div>
+
+        {/* MOBILE CARDS VIEW: 100% width, ZERO horizontal scrolling (Hidden on Desktop) */}
+        <div className="md:hidden divide-y divide-slate-100">
+          {filteredJobs.length === 0 ? (
+            <div className="py-12 px-4 text-center text-slate-400">
+              <Briefcase className="w-10 h-10 mx-auto text-slate-300 mb-2" />
+              <p className="font-bold text-slate-700 text-sm">No job postings found</p>
+              <p className="text-xs text-slate-400 mt-1">
+                No jobs match your search or filter criteria.
+              </p>
+            </div>
+          ) : (
+            filteredJobs.map((j) => {
+              const matchedComp = companies?.find(
+                (c) =>
+                  (j.companyId && (c.id === j.companyId || c.userId === j.companyId)) ||
+                  (c.name && j.company && c.name.toLowerCase() === j.company.toLowerCase()) ||
+                  (c.email && j.company && c.email.toLowerCase() === j.company.toLowerCase())
+              );
+              const displayCompany = matchedComp?.name || (j.company?.includes("@") ? (matchedComp?.name || j.company.split("@")[0]) : j.company);
+              const displayEmail = j.companyEmail || matchedComp?.email || (j.company?.includes("@") ? j.company : (j.postedBy?.includes("@") ? j.postedBy : ""));
+
+              return (
+                <div key={`mob-job-${j.id}`} className="p-4 space-y-3 bg-white">
+                  {/* Header: Title + Company + Status Pill */}
+                  <div className="flex items-start justify-between gap-2.5">
+                    <div className="min-w-0 flex-1">
+                      <h4
+                        onClick={() => handleViewJob(j)}
+                        className="font-bold text-slate-900 text-sm leading-tight hover:text-blue-600 transition cursor-pointer truncate"
+                      >
+                        {j.title}
+                      </h4>
+                      <div className="flex items-center gap-1.5 text-xs text-slate-700 font-semibold mt-1">
+                        <Building2 className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                        <span className="truncate">{displayCompany}</span>
+                      </div>
+                      {displayEmail && (
+                        <p className="text-[11px] text-slate-500 flex items-center gap-1 truncate mt-0.5">
+                          <Mail className="w-3 h-3 text-slate-400 shrink-0" />
+                          <span className="truncate">{displayEmail}</span>
+                        </p>
+                      )}
+                    </div>
+
+                    <span
+                      className={`shrink-0 inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                        j.status === "Active"
+                          ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                          : j.status === "Pending"
+                          ? "bg-blue-50 text-blue-700 border-blue-200"
+                          : j.status === "Paused"
+                          ? "bg-amber-50 text-amber-700 border-amber-200"
+                          : j.status === "Expired"
+                          ? "bg-slate-100 text-slate-600 border-slate-200"
+                          : "bg-rose-50 text-rose-700 border-rose-200"
+                      }`}
+                    >
+                      {j.status}
+                    </span>
+                  </div>
+
+                  {/* Badges: Type, Location, Salary */}
+                  <div className="flex items-center gap-1.5 flex-wrap text-xs">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200/70">
+                      <Briefcase className="w-3 h-3 text-blue-500 shrink-0" />
+                      <span>{j.type}</span>
+                    </span>
+
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-medium bg-slate-100 text-slate-600">
+                      <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
+                      <span>{j.location}</span>
+                    </span>
+
+                    {j.salary && (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-slate-100 text-slate-800">
+                        <span>{j.salary}</span>
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Actions Row */}
+                  <div className="flex items-center gap-2 pt-1 border-t border-slate-100">
+                    <button
+                      type="button"
+                      onClick={() => handleViewJob(j)}
+                      className="flex-1 py-2 px-2.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 active:scale-[0.98] rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs"
+                    >
+                      <Eye className="w-3.5 h-3.5 text-slate-500" />
+                      <span>Details</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleOpenApplicants(j)}
+                      className={`flex-1 py-2 px-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs active:scale-[0.98] ${
+                        (j.applicantsCount ?? 0) > 0
+                          ? "bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200/80"
+                          : "bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200/70"
+                      }`}
+                    >
+                      <Users className="w-3.5 h-3.5 text-blue-600" />
+                      <span>{j.applicantsCount ?? 0} Applied</span>
+                    </button>
+
+                    {j.status === "Pending" ? (
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => onToggleStatus(j.id, "Active")}
+                          className="p-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition cursor-pointer shadow-2xs"
+                          title="Approve Job"
+                        >
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => onToggleStatus(j.id, "Closed")}
+                          className="p-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 transition cursor-pointer"
+                          title="Reject Job"
+                        >
+                          <XCircle className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ) : j.status === "Active" ? (
+                      <button
+                        type="button"
+                        onClick={() => onToggleStatus(j.id, "Closed")}
+                        className="p-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 transition cursor-pointer"
+                        title="Pause / Close Job"
+                      >
+                        <Pause className="w-3.5 h-3.5" />
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => onToggleStatus(j.id, "Active")}
+                        className="p-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 transition cursor-pointer"
+                        title="Reactivate Job"
+                      >
+                        <Play className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!confirm(`Are you sure you want to delete job "${j.title}"?`)) return;
+                        onDeleteJob(j.id);
+                      }}
+                      className="p-2 rounded-xl hover:bg-rose-50 text-slate-400 hover:text-rose-600 border border-slate-200/60 transition cursor-pointer"
+                      title="Delete Job"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
       </div>
 

@@ -6,14 +6,13 @@ import {
   Building2,
   Briefcase,
   FileText,
-  MoreHorizontal,
 } from "lucide-react";
 import { AdminTab } from "./AdminSidebar";
 
 interface MobileBottomNavProps {
   activeTab: AdminTab;
   setActiveTab: (tab: AdminTab) => void;
-  onOpenSidebar: () => void;
+  onOpenSidebar?: () => void;
   pendingCount: number;
 }
 
@@ -78,19 +77,6 @@ export default function MobileBottomNav({
           </button>
         );
       })}
-
-      {/* 3-Dots Menu / Sidebar Drawer toggle */}
-      <button
-        onClick={onOpenSidebar}
-        title="Open sidebar menu (3 dots)"
-        aria-label="Open sidebar menu"
-        className="flex flex-col items-center justify-center p-1 text-slate-500 hover:text-blue-600 transition-colors cursor-pointer group"
-      >
-        <div className="w-5 h-5 flex items-center justify-center">
-          <MoreHorizontal className="w-5 h-5 group-hover:scale-110 transition-transform" />
-        </div>
-        <span className="text-[10px] mt-0.5 font-medium group-hover:text-blue-600">Menu</span>
-      </button>
     </div>
   );
 }

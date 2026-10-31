@@ -417,6 +417,7 @@ export default function CompanyDashboardPage() {
     }
     setActiveTab(tab);
     setIsMobileSidebarOpen(false);
+    setIsMobileSearchOpen(false);
     setIsProfileDropdownOpen(false);
   };
 
@@ -1093,6 +1094,7 @@ export default function CompanyDashboardPage() {
 
   // Search & Filter
   const [searchQuery, setSearchQuery] = useState("");
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [applicantFilter, setApplicantFilter] = useState<
     "ALL" | "Applied" | "Reviewing" | "Shortlisted" | "Interview" | "Hired" | "Rejected"
   >("ALL");
@@ -2734,6 +2736,7 @@ export default function CompanyDashboardPage() {
                 <button
                   onClick={() => {
                     setIsMobileSidebarOpen(false);
+    setIsMobileSearchOpen(false);
                     setIsBuyCreditsModalOpen(true);
                   }}
                   className="mt-3 w-full py-1.5 px-3 rounded-xl bg-white hover:bg-[#F5F3FF] text-[#7C3AED] text-[11px] font-bold border border-slate-200 hover:border-[#DDD6FE] transition flex items-center justify-center gap-1 cursor-pointer shadow-2xs"
@@ -2750,7 +2753,8 @@ export default function CompanyDashboardPage() {
       {/* RIGHT CONTENT WRAPPER */}
       <div className="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto">
         {/* TOP BAR */}
-        <header className="sticky top-0 z-20 bg-white/95 backdrop-blur-md border-b border-slate-200/80 px-3.5 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-2.5 sm:gap-4 shadow-xs">
+        <header className="sticky top-0 z-20 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
+          <div className="px-3.5 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-2.5 sm:gap-4">
           <div className="flex items-center gap-2 sm:gap-4 flex-1 max-w-2xl min-w-0">
             {/* Hamburger Button for Mobile / Tablet */}
             <button
@@ -2768,7 +2772,7 @@ export default function CompanyDashboardPage() {
               </span>
             </div>
 
-            <div className="relative w-full min-w-0">
+            <div className="relative w-full min-w-0 hidden sm:block">
               <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="text"
@@ -2780,7 +2784,22 @@ export default function CompanyDashboardPage() {
             </div>
           </div>
 
-          {/* Top Bar Right: Company Profile & Account Menu */}
+          {/* Top Bar Right: Mobile Search Icon + Company Profile & Account Menu */}
+          <div className="flex items-center gap-2 shrink-0">
+            {/* Mobile Search Toggle Button */}
+            <button
+              type="button"
+              onClick={() => setIsMobileSearchOpen((prev) => !prev)}
+              aria-label="Toggle search bar"
+              className={`sm:hidden p-2 rounded-xl border transition cursor-pointer flex items-center justify-center ${
+                isMobileSearchOpen || searchQuery
+                  ? "bg-purple-50 text-[#7C3AED] border-purple-200"
+                  : "text-slate-600 hover:text-[#7C3AED] hover:bg-purple-50 border-slate-200"
+              }`}
+              title="Search candidates, roles"
+            >
+              <Search className="w-4 h-4" />
+            </button>
           <div ref={profileDropdownRef} className="relative shrink-0">
             <button
               onClick={() => setIsProfileDropdownOpen((prev) => !prev)}
@@ -2887,7 +2906,45 @@ export default function CompanyDashboardPage() {
               </div>
             )}
           </div>
-        </header>
+          </div>
+        </div>
+
+        {/* Mobile Search Bar Dropdown (Opens right below the navbar) */}
+        {isMobileSearchOpen && (
+          <div className="sm:hidden px-3.5 pb-3 pt-1 border-t border-slate-100 bg-white/95 animate-in fade-in slide-in-from-top-1 duration-150">
+            <div className="relative w-full flex items-center gap-2">
+              <div className="relative flex-1">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  type="text"
+                  autoFocus
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search candidates, roles..."
+                  className="w-full bg-slate-100/90 focus:bg-white text-xs text-slate-800 placeholder-slate-400 pl-10 pr-8 py-2 rounded-full border border-slate-200 focus:border-purple-300 focus:ring-3 focus:ring-purple-100 outline-hidden transition"
+                />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
+                    title="Clear search"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsMobileSearchOpen(false)}
+                className="px-2.5 py-1.5 text-xs font-bold text-slate-500 hover:text-slate-800 rounded-lg hover:bg-slate-100 transition cursor-pointer shrink-0"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+      </header>
 
         {/* MAIN BODY PER TAB */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 max-w-7xl w-full mx-auto pb-24 md:pb-8">
@@ -3122,9 +3179,6 @@ export default function CompanyDashboardPage() {
                           <Users className="w-4 h-4 text-[#7C3AED]" />
                           <span>Recent Candidate Applications</span>
                         </h2>
-                        <span className="sm:hidden text-[9px] font-bold text-[#7C3AED] bg-[#EDE9FE] px-2 py-0.5 rounded-full border border-[#DDD6FE]">
-                          Scroll →
-                        </span>
                       </div>
                       <p className="text-xs text-slate-500 mt-0.5">
                         Take immediate action to hire, interview, or reject applicants.
@@ -3140,46 +3194,152 @@ export default function CompanyDashboardPage() {
                     </button>
                   </div>
 
-                  {/* Applicants List - Horizontally scrollable on mobile, natural full width on desktop (Exact like Image 2) */}
-                  <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0 pb-2">
-                    <div className="space-y-3 min-w-[680px] sm:min-w-0 pr-3 sm:pr-0">
-                      {applicants.slice(0, 5).map((app) => (
-                        <div
-                          key={app.id}
-                          className="p-4 rounded-2xl bg-slate-50/80 border border-slate-100 hover:bg-slate-100/70 transition flex items-center justify-between gap-6 whitespace-nowrap shadow-xs"
-                        >
-                          {/* Left: Full Candidate Details */}
-                          <div className="flex items-center gap-3.5 shrink-0">
-                            <div
-                              style={{ backgroundColor: "#EDE9FE", color: "#6D28D9", borderColor: "#DDD6FE" }}
-                              className="w-11 h-11 rounded-2xl border font-black text-sm flex items-center justify-center shrink-0 shadow-xs"
-                            >
-                              {app.candidateName.slice(0, 2).toUpperCase()}
-                            </div>
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <h4 className="text-xs sm:text-sm font-bold text-slate-900">
-                                  {app.candidateName}
-                                </h4>
-                                <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                  {app.matchScore}% Match
-                                </span>
+                  {/* DESKTOP VIEW: Row layout with quick actions (Hidden on Mobile) */}
+                  <div className="hidden sm:block">
+                    {applicants.length === 0 ? (
+                      <div className="py-10 text-center text-slate-400">
+                        <Users className="w-9 h-9 mx-auto text-slate-300 mb-2" />
+                        <p className="font-bold text-slate-700 text-sm">No applications yet</p>
+                        <p className="text-xs text-slate-400 mt-1">
+                          When candidates apply to your job postings, they will appear here.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {applicants.slice(0, 5).map((app) => (
+                          <div
+                            key={app.id}
+                            className="p-4 rounded-2xl bg-slate-50/80 border border-slate-100 hover:bg-slate-100/70 transition flex items-center justify-between gap-6 whitespace-nowrap shadow-xs"
+                          >
+                            {/* Left: Full Candidate Details */}
+                            <div className="flex items-center gap-3.5 shrink-0">
+                              <div
+                                style={{ backgroundColor: "#EDE9FE", color: "#6D28D9", borderColor: "#DDD6FE" }}
+                                className="w-11 h-11 rounded-2xl border font-black text-sm flex items-center justify-center shrink-0 shadow-xs"
+                              >
+                                {app.candidateName.slice(0, 2).toUpperCase()}
                               </div>
-                              <p className="text-xs text-slate-600 mt-0.5">{app.appliedRole}</p>
-                              <p className="text-[11px] text-slate-400 flex items-center gap-2 mt-1">
-                                <span>{app.experience}</span>
-                                <span>•</span>
-                                <span>{app.location}</span>
-                                <span>•</span>
-                                <span>{app.appliedDate}</span>
-                              </p>
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <h4 className="text-xs sm:text-sm font-bold text-slate-900">
+                                    {app.candidateName}
+                                  </h4>
+                                  <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                    {app.matchScore}% Match
+                                  </span>
+                                </div>
+                                <p className="text-xs text-slate-600 mt-0.5">{app.appliedRole}</p>
+                                <p className="text-[11px] text-slate-400 flex items-center gap-2 mt-1">
+                                  <span>{app.experience}</span>
+                                  <span>•</span>
+                                  <span>{app.location}</span>
+                                  <span>•</span>
+                                  <span>{app.appliedDate}</span>
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* Right: Status Badge & Action Buttons */}
+                            <div className="flex items-center gap-2.5 shrink-0 pl-2">
+                              <span
+                                className={`px-3 py-1 rounded-full text-[10px] font-black uppercase ${
+                                  app.status === "Hired"
+                                    ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                    : app.status === "Rejected"
+                                    ? "bg-rose-50 text-rose-700 border border-rose-200"
+                                    : app.status === "Interview"
+                                    ? "bg-purple-50 text-purple-700 border border-purple-200"
+                                    : app.status === "Shortlisted"
+                                    ? "bg-amber-50 text-amber-700 border border-amber-200"
+                                    : "bg-[#EDE9FE] text-[#7C3AED] border border-[#DDD6FE]"
+                                }`}
+                              >
+                                {app.status}
+                              </span>
+
+                              {/* Quick Shortlist Button */}
+                              {app.status !== "Shortlisted" && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleUpdateStatus(app.id, "Shortlisted")}
+                                  className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-[11px] font-bold transition flex items-center gap-1 cursor-pointer shadow-2xs"
+                                  title="Shortlist this candidate"
+                                >
+                                  <Sparkles className="w-3.5 h-3.5" />
+                                  <span>Shortlist</span>
+                                </button>
+                              )}
+
+                              {/* Quick Reject Button */}
+                              {app.status !== "Rejected" && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleUpdateStatus(app.id, "Rejected")}
+                                  className="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white border border-rose-200 text-[11px] font-bold transition flex items-center gap-1 cursor-pointer"
+                                  title="Reject application"
+                                >
+                                  <X className="w-3.5 h-3.5" />
+                                  <span>Reject</span>
+                                </button>
+                              )}
+
+                              <button
+                                type="button"
+                                onClick={() => handleViewResume(app)}
+                                className="p-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-600 border border-slate-200 transition cursor-pointer shadow-2xs"
+                                title="View Full Profile & Resume"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </button>
                             </div>
                           </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
 
-                          {/* Right: Status Badge & Action Buttons (Exact like Image 2) */}
-                          <div className="flex items-center gap-2.5 shrink-0 pl-2">
+                  {/* MOBILE VIEW: 100% width vertical cards, ZERO horizontal scrolling (Hidden on Desktop) */}
+                  <div className="sm:hidden space-y-3">
+                    {applicants.length === 0 ? (
+                      <div className="py-8 px-4 text-center text-slate-400">
+                        <Users className="w-8 h-8 mx-auto text-slate-300 mb-2" />
+                        <p className="font-bold text-slate-700 text-sm">No applications yet</p>
+                        <p className="text-xs text-slate-400 mt-1">
+                          When candidates apply to your job postings, they will appear here.
+                        </p>
+                      </div>
+                    ) : (
+                      applicants.slice(0, 5).map((app) => (
+                        <div
+                          key={`mob-rec-app-${app.id}`}
+                          className="p-3.5 rounded-2xl bg-slate-50/90 border border-slate-200/80 shadow-xs space-y-2.5"
+                        >
+                          {/* Top: Avatar + Candidate Name, Match Badge & Status Pill */}
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                              <div
+                                style={{ backgroundColor: "#EDE9FE", color: "#6D28D9", borderColor: "#DDD6FE" }}
+                                className="w-10 h-10 rounded-xl border font-black text-xs flex items-center justify-center shrink-0 shadow-xs"
+                              >
+                                {app.candidateName.slice(0, 2).toUpperCase()}
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  <h4 className="text-xs font-bold text-slate-900 truncate">
+                                    {app.candidateName}
+                                  </h4>
+                                  <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                    {app.matchScore}% Match
+                                  </span>
+                                </div>
+                                <p className="text-[11px] font-medium text-slate-600 truncate mt-0.5">
+                                  {app.appliedRole}
+                                </p>
+                              </div>
+                            </div>
+
                             <span
-                              className={`px-3 py-1 rounded-full text-[10px] font-black uppercase ${
+                              className={`shrink-0 px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wide ${
                                 app.status === "Hired"
                                   ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
                                   : app.status === "Rejected"
@@ -3193,12 +3353,34 @@ export default function CompanyDashboardPage() {
                             >
                               {app.status}
                             </span>
+                          </div>
 
-                            {/* Quick Shortlist Button */}
+                          {/* Middle: Experience, Location & Applied Date */}
+                          <div className="text-[10px] text-slate-500 flex items-center gap-1.5 flex-wrap bg-white/80 px-2.5 py-1.5 rounded-lg border border-slate-100">
+                            <span className="font-semibold text-slate-700">{app.experience}</span>
+                            <span>•</span>
+                            <span>{app.location}</span>
+                            <span>•</span>
+                            <span>{app.appliedDate}</span>
+                          </div>
+
+                          {/* Bottom: Action Buttons */}
+                          <div className="flex items-center gap-2 pt-1 border-t border-slate-200/60">
+                            <button
+                              type="button"
+                              onClick={() => handleViewResume(app)}
+                              className="flex-1 py-1.5 px-2.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+                              title="View Full Profile & Resume"
+                            >
+                              <Eye className="w-3.5 h-3.5 text-[#7C3AED]" />
+                              <span>View CV</span>
+                            </button>
+
                             {app.status !== "Shortlisted" && (
                               <button
+                                type="button"
                                 onClick={() => handleUpdateStatus(app.id, "Shortlisted")}
-                                className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-[11px] font-bold transition flex items-center gap-1 cursor-pointer shadow-2xs"
+                                className="flex-1 py-1.5 px-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold transition flex items-center justify-center gap-1 cursor-pointer shadow-2xs"
                                 title="Shortlist this candidate"
                               >
                                 <Sparkles className="w-3.5 h-3.5" />
@@ -3206,29 +3388,21 @@ export default function CompanyDashboardPage() {
                               </button>
                             )}
 
-                            {/* Quick Reject Button */}
                             {app.status !== "Rejected" && (
                               <button
+                                type="button"
                                 onClick={() => handleUpdateStatus(app.id, "Rejected")}
-                                className="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white border border-rose-200 text-[11px] font-bold transition flex items-center gap-1 cursor-pointer"
+                                className="py-1.5 px-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 text-xs font-bold transition flex items-center justify-center gap-1 cursor-pointer"
                                 title="Reject application"
                               >
                                 <X className="w-3.5 h-3.5" />
                                 <span>Reject</span>
                               </button>
                             )}
-
-                            <button
-                              onClick={() => handleViewResume(app)}
-                              className="p-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-600 border border-slate-200 transition cursor-pointer shadow-2xs"
-                              title="View Full Profile & Resume"
-                            >
-                              <Eye className="w-4 h-4" />
-                            </button>
                           </div>
                         </div>
-                      ))}
-                    </div>
+                      ))
+                    )}
                   </div>
                 </div>
 
@@ -3823,12 +3997,7 @@ export default function CompanyDashboardPage() {
             <div className="space-y-6 animate-in fade-in duration-200">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-200/80">
                 <div>
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-xl font-black text-slate-900">Job Postings Management</h2>
-                    <span className="sm:hidden text-[9px] font-bold text-[#7C3AED] bg-[#EDE9FE] px-2 py-0.5 rounded-full border border-[#DDD6FE]">
-                      Scroll →
-                    </span>
-                  </div>
+                  <h2 className="text-xl font-black text-slate-900">Job Postings Management</h2>
                   <p className="text-xs text-slate-500">
                     Total {totalJobsCount} job openings created ({activeJobsCount} currently active)
                   </p>
@@ -3860,8 +4029,8 @@ export default function CompanyDashboardPage() {
               </div>
 
               {/* JOBS TABLE: Clean layout with 3-dots action menu and zero horizontal scrolling */}
-              <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-xs">
-                <div className="w-full">
+              <div className="hidden md:block bg-white rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-xs overflow-hidden">
+                <div className="w-full overflow-x-auto">
                   <table className="w-full text-left text-xs">
                     <thead className="bg-slate-50 text-slate-500 font-bold uppercase text-[10px] tracking-wider border-b border-slate-200/80">
                       <tr>
@@ -4049,6 +4218,204 @@ export default function CompanyDashboardPage() {
                   </tbody>
                   </table>
                 </div>
+              </div>
+
+              {/* MOBILE CARDS VIEW: 100% responsive, no horizontal scrolling needed */}
+              <div className="md:hidden space-y-3">
+                {jobs.length === 0 ? (
+                  <div className="bg-white rounded-2xl border border-slate-200/80 p-8 text-center text-slate-400">
+                    <Briefcase className="w-8 h-8 mx-auto text-slate-300 mb-2" />
+                    <p className="font-semibold text-slate-600">No job openings created yet</p>
+                    <p className="text-xs text-slate-400 mt-1">
+                      Click &quot;Post a New Job&quot; above to create your first opening.
+                    </p>
+                  </div>
+                ) : (
+                  jobs.map((job) => (
+                    <div
+                      key={`mob-${job.id}`}
+                      className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-2xs space-y-3"
+                    >
+                      {/* Top Header: Title, Status & Actions */}
+                      <div className="flex items-start justify-between gap-2.5">
+                        <div className="min-w-0 flex-1">
+                          <h3 className="font-bold text-slate-900 text-sm leading-snug break-words">
+                            {job.title}
+                          </h3>
+                          <p className="text-[11px] font-semibold text-[#7C3AED] mt-0.5">
+                            {job.department || "General"}
+                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <span
+                            className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase whitespace-nowrap ${
+                              job.status === "Active"
+                                ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                : job.status === "Pending"
+                                ? "bg-amber-50 text-amber-700 border border-amber-200"
+                                : "bg-slate-100 text-slate-600 border border-slate-200"
+                            }`}
+                          >
+                            {job.status}
+                          </span>
+
+                          <div className="relative inline-block text-left" onClick={(e) => e.stopPropagation()}>
+                            <button
+                              type="button"
+                              onClick={() => setActionMenuJobId(actionMenuJobId === `m-${job.id}` ? null : `m-${job.id}`)}
+                              className={`w-7 h-7 rounded-lg flex items-center justify-center transition cursor-pointer border ${
+                                actionMenuJobId === `m-${job.id}`
+                                  ? "bg-slate-200 text-slate-900 border-slate-300"
+                                  : "text-slate-500 hover:text-slate-800 hover:bg-slate-100 border-slate-200"
+                              }`}
+                              title="Actions"
+                            >
+                              <MoreVertical className="w-3.5 h-3.5" />
+                            </button>
+
+                            {actionMenuJobId === `m-${job.id}` && (
+                              <div className="absolute right-0 top-full mt-1.5 w-48 bg-white rounded-2xl shadow-xl border border-slate-200/90 py-1.5 z-50 text-left animate-in fade-in zoom-in-95">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setActionMenuJobId(null);
+                                    openEditJobModal(job);
+                                  }}
+                                  className="w-full px-3.5 py-2 text-xs font-semibold text-slate-700 hover:text-indigo-600 hover:bg-indigo-50/70 flex items-center gap-2.5 transition cursor-pointer"
+                                >
+                                  <Pencil className="w-3.5 h-3.5 text-slate-400" />
+                                  <span>Edit Job</span>
+                                </button>
+
+                                {job.status === "Pending" ? (
+                                  <div className="px-3.5 py-2 text-xs font-medium text-amber-700 bg-amber-50/60 flex items-center gap-2.5 cursor-not-allowed">
+                                    <Clock className="w-3.5 h-3.5 text-amber-500" />
+                                    <span>In Review (Admin)</span>
+                                  </div>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    onClick={async () => {
+                                      setActionMenuJobId(null);
+                                      const newStatus = (job.status === "Active" ? "Paused" : "Active") as "Active" | "Pending" | "Paused" | "Closed";
+                                      if (newStatus === "Active" && (!canPostLiveJobs || companyStatus !== "Approved")) {
+                                        showToast("Company is awaiting approval. You cannot activate jobs until approved by Super Admin.");
+                                        return;
+                                      }
+                                      setJobs((prev) => {
+                                        const updated = prev.map((j) =>
+                                          j.id === job.id ? { ...j, status: newStatus } : j
+                                        );
+                                        try {
+                                          const user = getStoredUser();
+                                          const uid = (user as any)?._id || user?.id || user?.userId || user?.email;
+                                          if (uid) localStorage.setItem(`company_posted_jobs_${uid}`, JSON.stringify(updated));
+                                        } catch (err) {}
+                                        return updated;
+                                      });
+                                      showToast(`Job status updated for ${job.title}`);
+                                      try {
+                                        await updateCompanyJobStatus(job.id, newStatus);
+                                      } catch (err) {
+                                        console.error("Failed to update status on backend:", err);
+                                      }
+                                    }}
+                                    className="w-full px-3.5 py-2 text-xs font-semibold text-slate-700 hover:text-slate-900 hover:bg-slate-100 flex items-center gap-2.5 transition cursor-pointer"
+                                  >
+                                    <AlertCircle className="w-3.5 h-3.5 text-slate-400" />
+                                    <span>{job.status === "Active" ? "Pause Job" : "Activate Job"}</span>
+                                  </button>
+                                )}
+
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setActionMenuJobId(null);
+                                    handleOpenJobApplicants(job);
+                                  }}
+                                  className="w-full px-3.5 py-2 text-xs font-semibold text-slate-700 hover:text-indigo-600 hover:bg-indigo-50/70 flex items-center gap-2.5 transition cursor-pointer"
+                                >
+                                  <Users className="w-3.5 h-3.5 text-slate-400" />
+                                  <span>View Candidates ({getJobApplicantCount(job)})</span>
+                                </button>
+
+                                <div className="h-px bg-slate-100 my-1" />
+
+                                <button
+                                  type="button"
+                                  onClick={async () => {
+                                    setActionMenuJobId(null);
+                                    if (!confirm(`Are you sure you want to delete job "${job.title}"?`)) return;
+                                    setJobs((prev) => {
+                                      const updated = prev.filter((j) => j.id !== job.id);
+                                      try {
+                                        const user = getStoredUser();
+                                        const uid = (user as any)?._id || user?.id || user?.userId || user?.email;
+                                        if (uid) localStorage.setItem(`company_posted_jobs_${uid}`, JSON.stringify(updated));
+                                      } catch (err) {}
+                                      return updated;
+                                    });
+                                    showToast(`Job ${job.title} deleted`);
+                                    try {
+                                      await deleteCompanyJob(job.id);
+                                    } catch (err) {
+                                      console.error("Failed to delete job on backend:", err);
+                                    }
+                                  }}
+                                  className="w-full px-3.5 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 flex items-center gap-2.5 transition cursor-pointer"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5 text-rose-500" />
+                                  <span>Delete Job</span>
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Location & Details Badges */}
+                      <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-slate-600">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-medium">
+                          <Building2 className="w-3 h-3 text-slate-400 shrink-0" />
+                          <span>{job.workplace || "Remote"} • {job.type}</span>
+                        </span>
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-medium">
+                          <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
+                          <span>{job.location}</span>
+                        </span>
+                        {job.experience && (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-medium">
+                            <Briefcase className="w-3 h-3 text-slate-400 shrink-0" />
+                            <span>{job.experience}</span>
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Salary & Candidate Applicants Row */}
+                      <div className="pt-2.5 border-t border-slate-100 flex items-center justify-between gap-2">
+                        <div>
+                          <span className="text-[10px] text-slate-400 font-medium block">Salary Package</span>
+                          <span className="font-bold text-emerald-600 text-xs tracking-tight">
+                            {job.salary || "Competitive"}
+                          </span>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => handleOpenJobApplicants(job)}
+                          style={{ backgroundColor: "#EDE9FE", color: "#6D28D9", borderColor: "#DDD6FE" }}
+                          className="px-3 py-1.5 rounded-xl text-xs font-extrabold border shadow-2xs hover:bg-[#DDD6FE] transition-all inline-flex items-center gap-1.5 whitespace-nowrap cursor-pointer active:scale-95 shrink-0"
+                          title={`Click to view candidates who applied for "${job.title}"`}
+                        >
+                          <Users className="w-3.5 h-3.5 text-[#7C3AED]" />
+                          <span>{getJobApplicantCount(job)} Candidates</span>
+                          <ExternalLink className="w-2.5 h-2.5 text-[#7C3AED] opacity-80" />
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           )}
@@ -4294,7 +4661,8 @@ export default function CompanyDashboardPage() {
                   </span>
                 </div>
 
-                <div className="overflow-x-auto">
+                {/* DESKTOP TABLE VIEW (Hidden on Mobile) */}
+                <div className="hidden md:block overflow-x-auto">
                   {purchasedResumes.length === 0 ? (
                     <div className="py-14 text-center text-slate-400">
                       <FolderDown className="w-10 h-10 mx-auto text-slate-300 mb-2.5" />
@@ -4462,6 +4830,147 @@ export default function CompanyDashboardPage() {
                         })}
                       </tbody>
                     </table>
+                  )}
+                </div>
+
+                {/* MOBILE CARDS VIEW (100% responsive, zero horizontal scroll on mobile) */}
+                <div className="md:hidden divide-y divide-slate-100">
+                  {purchasedResumes.length === 0 ? (
+                    <div className="py-12 px-4 text-center text-slate-400">
+                      <FolderDown className="w-8 h-8 mx-auto text-slate-300 mb-2" />
+                      <p className="font-bold text-slate-700 text-sm">No resumes in vault yet</p>
+                      <p className="text-xs text-slate-400 mt-1">
+                        Candidate resumes sent by platform admin or unlocked from candidate pool will appear here.
+                      </p>
+                    </div>
+                  ) : (
+                    purchasedResumes.map((res) => {
+                      const skillsList = Array.isArray(res.skills) && res.skills.length > 0
+                        ? res.skills
+                        : typeof (res as any).skills === "string" && (res as any).skills.trim()
+                        ? (res as any).skills.split(",").map((s: string) => s.trim()).filter(Boolean)
+                        : (res as any).domain
+                        ? [(res as any).domain]
+                        : [];
+
+                      return (
+                        <div key={`mob-vault-${res.id}`} className="p-4 space-y-3 bg-white">
+                          {/* Header: PDF Badge + Candidate Name & Role + Status Badge */}
+                          <div className="flex items-start justify-between gap-2.5">
+                            <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                              <div className="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 font-black text-xs flex items-center justify-center shrink-0 border border-rose-200">
+                                PDF
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <h4 className="font-bold text-slate-900 text-sm leading-tight truncate">
+                                  {res.candidateName}
+                                </h4>
+                                <p className="text-xs font-semibold text-slate-700 mt-0.5 truncate">
+                                  {res.title || "Job Seeker"}
+                                </p>
+                              </div>
+                            </div>
+
+                            <span
+                              className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase whitespace-nowrap shrink-0 ${
+                                res.isUnlocked
+                                  ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                  : "bg-amber-50 text-amber-700 border border-amber-200"
+                              }`}
+                            >
+                              {res.isUnlocked ? "Unlocked" : "Locked"}
+                            </span>
+                          </div>
+
+                          {/* Experience, Location & Purchased Date */}
+                          <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-slate-600">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-medium">
+                              <Briefcase className="w-3 h-3 text-slate-400 shrink-0" />
+                              <span>{res.experience || "Fresher"}</span>
+                            </span>
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-medium">
+                              <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
+                              <span>{res.location || "India"}</span>
+                            </span>
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-50 text-slate-500 font-medium border border-slate-100">
+                              <Calendar className="w-3 h-3 text-slate-400 shrink-0" />
+                              <span>{res.purchasedDate || "Recent"}</span>
+                            </span>
+                          </div>
+
+                          {/* Skills Pills */}
+                          {skillsList.length > 0 && (
+                            <div className="flex flex-wrap items-center gap-1">
+                              {skillsList.slice(0, 4).map((sk: string, idx: number) => (
+                                <span
+                                  key={idx}
+                                  className="inline-flex items-center px-2 py-0.5 rounded-md bg-purple-50 text-[#7C3AED] text-[10px] font-bold border border-purple-100"
+                                >
+                                  {sk}
+                                </span>
+                              ))}
+                              {skillsList.length > 4 && (
+                                <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-600 text-[10px] font-bold">
+                                  +{skillsList.length - 4}
+                                </span>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Contact Details Card Box */}
+                          <div className="p-3 rounded-xl bg-slate-50/80 border border-slate-200/70 text-xs">
+                            {res.isUnlocked ? (
+                              <div className="space-y-1">
+                                <p className="flex items-center gap-2 text-slate-900 font-semibold truncate">
+                                  <Mail className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                                  <span className="truncate">{res.email}</span>
+                                </p>
+                                <p className="flex items-center gap-2 text-slate-700">
+                                  <Phone className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                                  <span>{res.phone || "+91 98765 43210"}</span>
+                                </p>
+                              </div>
+                            ) : (
+                              <div className="space-y-1 text-slate-400 select-none">
+                                <p className="flex items-center gap-2 font-mono">
+                                  <Lock className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                                  <span>••••••••@••••.com</span>
+                                </p>
+                                <p className="flex items-center gap-2 font-mono">
+                                  <Phone className="w-3.5 h-3.5 text-slate-300 shrink-0" />
+                                  <span>+91 ••••• ••••</span>
+                                </p>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Action Button: Full Width */}
+                          <div>
+                            {res.isUnlocked ? (
+                              <button
+                                type="button"
+                                onClick={() => handleDownloadPurchasedResume(res)}
+                                className="w-full inline-flex items-center justify-center gap-2 py-2 px-3.5 rounded-xl bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-xs font-bold transition cursor-pointer shadow-xs active:scale-[0.99]"
+                                title="Download verified resume PDF"
+                              >
+                                <Download className="w-3.5 h-3.5" />
+                                <span>Download CV</span>
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => handleUnlockResume(res)}
+                                className="w-full inline-flex items-center justify-center gap-2 py-2 px-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 active:scale-[0.99] text-white text-xs font-bold transition cursor-pointer shadow-xs"
+                                title="Unlock candidate contact details & CV (Deducts 1 Credit)"
+                              >
+                                <Lock className="w-3.5 h-3.5" />
+                                <span>Unlock Contact (1 Credit)</span>
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })
                   )}
                 </div>
               </div>
@@ -5318,14 +5827,6 @@ export default function CompanyDashboardPage() {
           >
             <CreditCard className="w-5 h-5" />
             <span>Plans</span>
-          </button>
-
-          <button
-            onClick={() => setIsMobileSidebarOpen(true)}
-            className="flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl text-[10px] font-bold text-slate-500 hover:text-slate-800 transition cursor-pointer"
-          >
-            <Menu className="w-5 h-5" />
-            <span>More</span>
           </button>
         </nav>
       </div>

@@ -244,7 +244,8 @@ export default function ApplicationsManager({
 
       {/* Applications & Resumes Table */}
       <div className="bg-white rounded-3xl border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.03)] overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* DESKTOP TABLE VIEW: Visible on md+ screens */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">
@@ -429,6 +430,130 @@ export default function ApplicationsManager({
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* MOBILE CARDS VIEW: 100% width, ZERO horizontal scrolling (Hidden on Desktop) */}
+        <div className="md:hidden divide-y divide-slate-100">
+          {filteredApps.length === 0 ? (
+            <div className="py-12 px-4 text-center">
+              <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto mb-3">
+                <FileText className="w-6 h-6" />
+              </div>
+              <p className="font-bold text-slate-700 text-sm">
+                No candidate resumes match this filter.
+              </p>
+              <p className="text-xs text-slate-400 mt-1 max-w-xs mx-auto">
+                Try adjusting your search query, domain or experience filters, or upload a new candidate resume.
+              </p>
+              <button
+                type="button"
+                onClick={() => setIsUploadModalOpen(true)}
+                className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition shadow-sm cursor-pointer"
+              >
+                <Upload className="w-3.5 h-3.5" />
+                <span>Upload First Resume</span>
+              </button>
+            </div>
+          ) : (
+            filteredApps.map((item) => {
+              const hasPdf = Boolean(item.pdfData || item.resumeUrl);
+
+              return (
+                <div
+                  key={`mob-app-${item.id}`}
+                  className="p-4 space-y-3 bg-white"
+                >
+                  {/* Top: Avatar + Candidate Name & Email + Status Pill */}
+                  <div className="flex items-start justify-between gap-2.5">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <div
+                        className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-white text-xs shrink-0 shadow-xs ${
+                          item.avatarBg || "bg-blue-600"
+                        }`}
+                      >
+                        {item.avatarLetter || "CD"}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h4 className="font-bold text-slate-900 text-sm leading-tight truncate">
+                          {item.candidateName}
+                        </h4>
+                        <p className="text-[11px] text-slate-500 truncate mt-0.5">
+                          {item.candidateEmail || `${item.candidateName.toLowerCase().replace(/\s+/g, "")}@example.com`}
+                        </p>
+                      </div>
+                    </div>
+
+                    <span
+                      className={`shrink-0 inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                        item.status === "Shortlisted"
+                          ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                          : item.status === "New"
+                          ? "bg-blue-50 text-blue-700 border-blue-200"
+                          : item.status === "Reviewed"
+                          ? "bg-amber-50 text-amber-700 border-amber-200"
+                          : item.status === "Hired"
+                          ? "bg-purple-50 text-purple-700 border-purple-200"
+                          : "bg-rose-50 text-rose-700 border-rose-200"
+                      }`}
+                    >
+                      {item.status}
+                    </span>
+                  </div>
+
+                  {/* Badges: Role, Domain, Experience & Type */}
+                  <div className="flex items-center gap-1.5 flex-wrap text-xs">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-slate-100 text-slate-800">
+                      <Briefcase className="w-3 h-3 text-slate-500 shrink-0" />
+                      <span>{item.position}</span>
+                    </span>
+
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-medium bg-slate-100 text-slate-600">
+                      <Layers className="w-3 h-3 text-slate-400 shrink-0" />
+                      <span>{item.domain || "Full Stack Dev"}</span>
+                    </span>
+
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-medium bg-slate-100 text-slate-600">
+                      <Clock className="w-3 h-3 text-slate-400 shrink-0" />
+                      <span>{item.experience || "Fresher"}</span>
+                    </span>
+
+                    {item.isProfileResume ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        Profile CV
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                        {item.company}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Actions: View / Open Resume */}
+                  <div className="flex items-center gap-2 pt-1 border-t border-slate-100">
+                    <button
+                      type="button"
+                      onClick={() => handleOpenDetail(item)}
+                      className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all shadow-2xs cursor-pointer flex items-center justify-center gap-1.5 ${
+                        hasPdf
+                          ? item.isProfileResume
+                            ? "bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200"
+                            : "bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200"
+                          : "bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200"
+                      }`}
+                    >
+                      <FileText className="w-3.5 h-3.5" />
+                      <span>{item.isProfileResume ? "View Profile CV" : "View Applied CV"}</span>
+                      {hasPdf && (
+                        <span className="text-[10px] px-1 py-0.2 rounded font-semibold bg-white/80">
+                          PDF
+                        </span>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
       </div>
 
